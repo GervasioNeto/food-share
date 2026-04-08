@@ -2,16 +2,7 @@
 
 Aplicativo mobile de doação e redistribuição de alimentos desenvolvido como projeto extensionista da Universidade de Fortaleza (UNIFOR).
 
-> **Disciplina:** T197 - Desenvolvimento de Plataformas Móveis  
-> **Docente:** Lyndainês Santos
-
-## 👥 Equipe
-
-| Nome | Matrícula |
-|------|-----------|
-| Carlos Alberto Freitas Gonçalves | 2422750 |
-| Antonio Gervasio Lopes Neto | 2417773 |
-| Victor Gomes Barbosa | 2426030 |
+> **Disciplina:** Desenvolvimento de Plataformas Móveis
 
 ---
 
@@ -35,38 +26,38 @@ O FoodShare conecta **doadores de alimentos** (restaurantes e pessoas físicas) 
 
 ## 📱 Telas
 
-| Tela | Descrição |
-|------|-----------|
-| Login | Autenticação com e-mail e senha |
-| Cadastro | Criação de conta como Doador ou Receptor |
-| Home | Lista de doações disponíveis com busca |
-| Mapa | Visualização das doações no mapa |
-| Detalhe da Doação | Informações completas + solicitação |
-| Nova Doação | Formulário para cadastrar doação |
-| Minhas Doações | Histórico e gerenciamento (doador) |
-| Solicitações | Aprovar ou recusar pedidos (doador) |
-| Notificações | Alertas de solicitações e atualizações |
-| Perfil & Impacto | Dados do usuário e métricas de doações |
+| Tela              | Descrição                                |
+| ----------------- | ---------------------------------------- |
+| Login             | Autenticação com e-mail e senha          |
+| Cadastro          | Criação de conta como Doador ou Receptor |
+| Home              | Lista de doações disponíveis com busca   |
+| Mapa              | Visualização das doações no mapa         |
+| Detalhe da Doação | Informações completas + solicitação      |
+| Nova Doação       | Formulário para cadastrar doação         |
+| Minhas Doações    | Histórico e gerenciamento (doador)       |
+| Solicitações      | Aprovar ou recusar pedidos (doador)      |
+| Notificações      | Alertas de solicitações e atualizações   |
+| Perfil & Impacto  | Dados do usuário e métricas de doações   |
 
 ---
 
 ## ✅ Requisitos Funcionais
 
-| ID | Nome | Status |
-|----|------|--------|
-| RF01 | Cadastro de Usuários (doador/receptor) | ✅ Implementado |
-| RF02 | Autenticação (login/logout) | ✅ Implementado |
-| RF03 | Edição de Perfil | 🔧 Parcial |
-| RF04 | Cadastro de Doação | ✅ Implementado |
-| RF05 | Gerenciamento de Doação (editar/excluir) | ✅ Implementado |
-| RF06 | Visualização de Solicitações | ✅ Implementado |
-| RF07 | Aprovação/Recusa de Solicitações | ✅ Implementado |
-| RF08 | Lista de Doações disponíveis | ✅ Implementado |
-| RF09 | Mapa de Doações com geolocalização | 🔧 Em desenvolvimento |
-| RF10 | Atualização de Status da doação | ✅ Implementado |
-| RF11 | Histórico do Doador | ✅ Implementado |
-| RF12 | Histórico do Receptor | 🔧 Parcial |
-| RF13 | Métricas de Impacto | ✅ Implementado |
+| ID   | Nome                                     | Status |
+| ---- | ---------------------------------------- | ------ |
+| RF01 | Cadastro de Usuários (doador/receptor)   |
+| RF02 | Autenticação (login/logout)              |
+| RF03 | Edição de Perfil                         |
+| RF04 | Cadastro de Doação                       |
+| RF05 | Gerenciamento de Doação (editar/excluir) |
+| RF06 | Visualização de Solicitações             |
+| RF07 | Aprovação/Recusa de Solicitações         |
+| RF08 | Lista de Doações disponíveis             |
+| RF09 | Mapa de Doações com geolocalização       |
+| RF10 | Atualização de Status da doação          |
+| RF11 | Histórico do Doador                      |
+| RF12 | Histórico do Receptor                    |
+| RF13 | Métricas de Impacto                      |
 
 ---
 
@@ -114,11 +105,11 @@ Execute o SQL disponível em [`docs/schema.sql`](docs/schema.sql) no **SQL Edito
 npx expo start
 ```
 
-| Plataforma | Comando |
-|------------|---------|
-| Android | `npx expo start --android` |
-| iOS | `npx expo start --ios` |
-| Web | `npx expo start --web` |
+| Plataforma | Comando                    |
+| ---------- | -------------------------- |
+| Android    | `npx expo start --android` |
+| iOS        | `npx expo start --ios`     |
+| Web        | `npx expo start --web`     |
 
 ---
 
