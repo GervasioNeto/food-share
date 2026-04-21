@@ -91,21 +91,33 @@ export default function EditProfileScreen({ navigation }: any) {
   async function uploadAvatar(): Promise<string | null> {
     if (!avatarUri || !user) return avatarUrl;
 
-    const ext = avatarUri.split(".").pop() ?? "jpg";
+    // Pega a extensão do URI original, mas ignora se for um blob URI
+    const uriParts = avatarUri.split(".");
+    const lastPart = uriParts[uriParts.length - 1];
+    // Se a extensão contiver "/", é um blob URI sem extensão real
+    const ext =
+      lastPart && !lastPart.includes("/") ? lastPart.split("?")[0] : "jpg";
+
     const fileName = `${user.id}/avatar.${ext}`;
+
     const response = await fetch(avatarUri);
     const blob = await response.blob();
 
+    // Usa o contentType real do blob quando disponível
+    const contentType =
+      blob.type && blob.type !== "application/octet-stream"
+        ? blob.type
+        : `image/${ext}`;
+
     const { error: uploadError } = await supabase.storage
       .from("avatars")
-      .upload(fileName, blob, { contentType: `image/${ext}`, upsert: true });
+      .upload(fileName, blob, { contentType, upsert: true });
 
     if (uploadError) throw uploadError;
 
     const { data } = supabase.storage.from("avatars").getPublicUrl(fileName);
     return data.publicUrl;
   }
-
   async function handleSave() {
     if (!name.trim()) {
       Alert.alert("Atenção", "O nome não pode estar vazio.");
