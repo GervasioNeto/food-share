@@ -123,10 +123,10 @@ export default function ProfileScreen({ navigation }: any) {
 
         <View style={{ gap: 12 }}>
           <TouchableOpacity
-            style={s.signOutBtn}
+            style={s.editProfileBtn}
             onPress={() => navigation.navigate("EditProfile")}
           >
-            <Text style={s.signOutText}>Editar perfil</Text>
+            <Text style={s.editProfileText}>Editar perfil</Text>
           </TouchableOpacity>
 
           <TouchableOpacity style={s.signOutBtn} onPress={handleSignOut}>
@@ -238,6 +238,15 @@ const s = StyleSheet.create({
   infoIcon: { fontSize: 20 },
   infoLabel: { fontSize: 12, color: "#888" },
   infoValue: { fontSize: 14, color: "#FFF", fontWeight: "500" },
+  editProfileBtn: {
+    backgroundColor: "#1E1E1E",
+    borderWidth: 1,
+    borderColor: "#3DDC97",
+    borderRadius: 12,
+    padding: 16,
+    alignItems: "center",
+  },
+  editProfileText: { color: "#3DDC97", fontWeight: "600", fontSize: 15 },
   signOutBtn: {
     borderWidth: 1,
     borderColor: "#FF4D4D",
