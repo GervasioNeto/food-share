@@ -13,7 +13,6 @@ export default function RegisterScreen({ navigation }: any) {
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
-  const [address, setAddress] = useState('');
   const [role, setRole] = useState<Role>('receiver');
   const [loading, setLoading] = useState(false);
 
@@ -22,9 +21,16 @@ export default function RegisterScreen({ navigation }: any) {
       Alert.alert('Atenção', 'Nome, e-mail e senha são obrigatórios.');
       return;
     }
+
     setLoading(true);
     try {
-      await signUp({ email: email.trim(), password, name, phone, role, address });
+      await signUp({
+        email: email.trim(),
+        password,
+        name,
+        phone,
+        role,
+      });
     } catch (err: any) {
       Alert.alert('Erro ao cadastrar', err.message ?? 'Tente novamente.');
     } finally {
@@ -67,8 +73,6 @@ export default function RegisterScreen({ navigation }: any) {
           keyboard="phone-pad" />
         <Field label="Senha" value={password} onChange={setPassword} placeholder="Mínimo 6 caracteres"
           secure />
-        <Field label="Endereço (opcional)" value={address} onChange={setAddress}
-          placeholder="Rua, número, bairro" />
 
         <TouchableOpacity style={s.btn} onPress={handleRegister} disabled={loading}>
           {loading
