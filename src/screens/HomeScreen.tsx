@@ -71,11 +71,6 @@ export default function HomeScreen({ navigation }: any) {
           <Text style={s.greeting}>Olá, {profile?.name?.split(' ')[0] ?? 'visitante'} 👋</Text>
           <Text style={s.sub}>Veja as doações disponíveis</Text>
         </View>
-        {profile?.role === 'donor' && (
-          <TouchableOpacity style={s.addBtn} onPress={() => navigation.navigate('NewDonation')}>
-            <Text style={s.addBtnText}>+ Doar</Text>
-          </TouchableOpacity>
-        )}
       </View>
 
       <TextInput
@@ -144,6 +139,16 @@ export default function HomeScreen({ navigation }: any) {
           }}
         />
       )}
+
+      {profile?.role === 'donor' && (
+        <TouchableOpacity
+          style={s.fab}
+          onPress={() => navigation.navigate('NewDonation')}
+          activeOpacity={0.85}
+        >
+          <Text style={s.fabText}>+</Text>
+        </TouchableOpacity>
+      )}
     </SafeAreaView>
   );
 }
@@ -156,11 +161,23 @@ const s = StyleSheet.create({
   },
   greeting: { fontSize: 22, fontWeight: '700', color: '#FFF' },
   sub: { fontSize: 13, color: '#888', marginTop: 2 },
-  addBtn: {
-    backgroundColor: '#3DDC97', paddingHorizontal: 16, paddingVertical: 8,
-    borderRadius: 20,
+  fab: {
+    position: 'absolute',
+    bottom: 24,
+    right: 24,
+    width: 58,
+    height: 58,
+    borderRadius: 29,
+    backgroundColor: '#3DDC97',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#3DDC97',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 8,
+    elevation: 8,
   },
-  addBtnText: { color: '#0F0F0F', fontWeight: '700', fontSize: 14 },
+  fabText: { color: '#0F0F0F', fontWeight: '700', fontSize: 28, lineHeight: 32, marginTop: -6 },
   search: {
     backgroundColor: '#1E1E1E', color: '#FFF', marginHorizontal: 16, borderRadius: 10,
     padding: 12, fontSize: 14, borderWidth: 1, borderColor: '#2E2E2E', marginBottom: 8,
