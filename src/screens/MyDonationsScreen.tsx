@@ -63,7 +63,7 @@ export default function MyDonationsScreen({ navigation }: any) {
   return (
     <SafeAreaView style={s.safe}>
 
-      {/* HEADER */}
+      
       <View style={s.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Text style={s.back}>← Voltar</Text>
@@ -72,7 +72,7 @@ export default function MyDonationsScreen({ navigation }: any) {
         <View style={{ width: 60 }} />
       </View>
 
-      {/* FILTROS */}
+      
       <View style={s.filterRow}>
         {FILTERS.map((f) => (
           <TouchableOpacity
@@ -85,7 +85,7 @@ export default function MyDonationsScreen({ navigation }: any) {
         ))}
       </View>
 
-      {/* LISTA */}
+     
       {loading ? (
         <ActivityIndicator size="large" color="#3DDC97" style={{ marginTop: 40 }} />
       ) : (
@@ -125,7 +125,7 @@ export default function MyDonationsScreen({ navigation }: any) {
         />
       )}
 
-      {/* BOTÃO COMPRIDO */}
+      
       <TouchableOpacity
         style={s.fab}
         onPress={() => navigation.navigate('NewDonation')}

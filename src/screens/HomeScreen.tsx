@@ -73,7 +73,7 @@ export default function HomeScreen({ navigation }: any) {
   return (
     <SafeAreaView style={s.safe}>
 
-      {/* HEADER */}
+      
       <View style={s.header}>
         <View>
           <Text style={s.greeting}>
@@ -82,11 +82,11 @@ export default function HomeScreen({ navigation }: any) {
           <Text style={s.sub}>Veja as doações disponíveis</Text>
         </View>
 
-        {/* espaço pra manter layout alinhado */}
+        
         <View style={{ width: 60 }} />
       </View>
 
-      {/* BUSCA */}
+     
       <TextInput
         style={s.search}
         placeholder="Buscar alimentos..."
@@ -95,7 +95,7 @@ export default function HomeScreen({ navigation }: any) {
         onChangeText={setSearch}
       />
 
-      {/* AÇÕES DO DOADOR */}
+      
       {profile?.role === 'donor' && (
         <View style={s.donorActions}>
           <TouchableOpacity
@@ -114,7 +114,6 @@ export default function HomeScreen({ navigation }: any) {
         </View>
       )}
 
-      {/* LISTA */}
       {loading ? (
         <ActivityIndicator style={{ marginTop: 40 }} color="#3DDC97" size="large" />
       ) : (
@@ -178,7 +177,6 @@ export default function HomeScreen({ navigation }: any) {
         />
       )}
 
-      {/* BOTÃO COMPRIDO (APENAS DOADOR) */}
       {profile?.role === 'donor' && (
         <TouchableOpacity
           style={s.fab}
@@ -279,7 +277,7 @@ const s = StyleSheet.create({
 
   emptyText: { color: '#555', fontSize: 15 },
 
-  /* BOTÃO */
+  
   fab: {
     position: 'absolute',
     bottom: 30,
