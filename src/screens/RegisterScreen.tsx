@@ -14,7 +14,7 @@ export default function RegisterScreen({ navigation }: any) {
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
-  const [address, setAddress] = useState(''); // ✅ agora controlado
+  const [address, setAddress] = useState(''); //
   const [role, setRole] = useState<Role>('receiver');
   const [loading, setLoading] = useState(false);
 
@@ -32,7 +32,7 @@ export default function RegisterScreen({ navigation }: any) {
         name,
         phone,
         role,
-        ...(role === 'receiver' && { address }), // ✅ só envia se receptor
+        ...(role === 'receiver' && { address }),
       });
     } catch (err: any) {
       Alert.alert('Erro ao cadastrar', err.message ?? 'Tente novamente.');
@@ -101,7 +101,7 @@ export default function RegisterScreen({ navigation }: any) {
           secure
         />
 
-        {/* ✅ Campo aparece SOMENTE para receptor */}
+      
         {role === 'receiver' && (
           <Field
             label="Endereço"
