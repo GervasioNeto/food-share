@@ -34,10 +34,12 @@ export default function HomeScreen({ navigation }: any) {
       .select('*, profiles(name)')
       .eq('status', 'available')
       .order('created_at', { ascending: false });
+
     if (data) {
       setDonations(data as Donation[]);
       setFiltered(data as Donation[]);
     }
+
     setLoading(false);
     setRefreshing(false);
   }, []);
@@ -45,7 +47,11 @@ export default function HomeScreen({ navigation }: any) {
   useEffect(() => { fetchDonations(); }, [fetchDonations]);
 
   useEffect(() => {
-    if (!search.trim()) { setFiltered(donations); return; }
+    if (!search.trim()) {
+      setFiltered(donations);
+      return;
+    }
+
     const q = search.toLowerCase();
     setFiltered(donations.filter(d =>
       d.food_name.toLowerCase().includes(q) ||
@@ -66,18 +72,21 @@ export default function HomeScreen({ navigation }: any) {
 
   return (
     <SafeAreaView style={s.safe}>
+
+      {/* HEADER */}
       <View style={s.header}>
         <View>
-          <Text style={s.greeting}>Olá, {profile?.name?.split(' ')[0] ?? 'visitante'} 👋</Text>
+          <Text style={s.greeting}>
+            Olá, {profile?.name?.split(' ')[0] ?? 'visitante'} 👋
+          </Text>
           <Text style={s.sub}>Veja as doações disponíveis</Text>
         </View>
-        {profile?.role === 'donor' && (
-          <TouchableOpacity style={s.addBtn} onPress={() => navigation.navigate('NewDonation')}>
-            <Text style={s.addBtnText}>+ Doar</Text>
-          </TouchableOpacity>
-        )}
+
+        {/* espaço pra manter layout alinhado */}
+        <View style={{ width: 60 }} />
       </View>
 
+      {/* BUSCA */}
       <TextInput
         style={s.search}
         placeholder="Buscar alimentos..."
@@ -86,39 +95,54 @@ export default function HomeScreen({ navigation }: any) {
         onChangeText={setSearch}
       />
 
+      {/* AÇÕES DO DOADOR */}
       {profile?.role === 'donor' && (
         <View style={s.donorActions}>
-          <TouchableOpacity style={s.actionChip} onPress={() => navigation.navigate('MyDonations')}>
+          <TouchableOpacity
+            style={s.actionChip}
+            onPress={() => navigation.navigate('MyDonations')}
+          >
             <Text style={s.actionChipText}>📦 Minhas doações</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={s.actionChip} onPress={() => navigation.navigate('Requests')}>
+
+          <TouchableOpacity
+            style={s.actionChip}
+            onPress={() => navigation.navigate('Requests')}
+          >
             <Text style={s.actionChipText}>📬 Solicitações</Text>
           </TouchableOpacity>
         </View>
       )}
 
+      {/* LISTA */}
       {loading ? (
         <ActivityIndicator style={{ marginTop: 40 }} color="#3DDC97" size="large" />
       ) : (
         <FlatList
           data={filtered}
           keyExtractor={(item) => item.id}
-          contentContainerStyle={{ padding: 16, gap: 12, paddingBottom: 32 }}
+          contentContainerStyle={{ padding: 16, gap: 12, paddingBottom: 100 }}
           refreshControl={
             <RefreshControl
               refreshing={refreshing}
-              onRefresh={() => { setRefreshing(true); fetchDonations(); }}
+              onRefresh={() => {
+                setRefreshing(true);
+                fetchDonations();
+              }}
               tintColor="#3DDC97"
             />
           }
           ListEmptyComponent={
             <View style={s.empty}>
               <Text style={s.emptyIcon}>🍽️</Text>
-              <Text style={s.emptyText}>Nenhuma doação disponível no momento</Text>
+              <Text style={s.emptyText}>
+                Nenhuma doação disponível no momento
+              </Text>
             </View>
           }
           renderItem={({ item }) => {
             const days = daysUntil(item.expiry_date);
+
             return (
               <TouchableOpacity
                 style={s.card}
@@ -127,64 +151,161 @@ export default function HomeScreen({ navigation }: any) {
               >
                 <View style={s.cardTop}>
                   <Text style={s.foodName}>{item.food_name}</Text>
+
                   <View style={[s.expiryBadge, { backgroundColor: expiryColor(days) + '22' }]}>
                     <Text style={[s.expiryText, { color: expiryColor(days) }]}>
                       {days <= 0 ? 'Vence hoje' : `${days}d`}
                     </Text>
                   </View>
                 </View>
+
                 <Text style={s.quantity}>{item.quantity} {item.unit}</Text>
-                <Text style={s.description} numberOfLines={2}>{item.description}</Text>
+                <Text style={s.description} numberOfLines={2}>
+                  {item.description}
+                </Text>
+
                 <View style={s.cardFooter}>
-                  <Text style={s.address} numberOfLines={1}>📍 {item.pickup_address}</Text>
-                  <Text style={s.donor}>por {item.profiles?.name}</Text>
+                  <Text style={s.address} numberOfLines={1}>
+                    📍 {item.pickup_address}
+                  </Text>
+                  <Text style={s.donor}>
+                    por {item.profiles?.name}
+                  </Text>
                 </View>
               </TouchableOpacity>
             );
           }}
         />
       )}
+
+      {/* BOTÃO COMPRIDO (APENAS DOADOR) */}
+      {profile?.role === 'donor' && (
+        <TouchableOpacity
+          style={s.fab}
+          onPress={() => navigation.navigate('NewDonation')}
+          activeOpacity={0.8}
+        >
+          <View style={s.fabContent}>
+            <Text style={s.fabLabel}>Criar Doação</Text>
+            <Text style={s.fabPlus}>＋</Text>
+          </View>
+        </TouchableOpacity>
+      )}
+
     </SafeAreaView>
   );
 }
 
 const s = StyleSheet.create({
   safe: { flex: 1, backgroundColor: '#0F0F0F' },
+
   header: {
-    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-    paddingHorizontal: 20, paddingTop: 8, paddingBottom: 16,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingTop: 8,
+    paddingBottom: 16,
   },
+
   greeting: { fontSize: 22, fontWeight: '700', color: '#FFF' },
   sub: { fontSize: 13, color: '#888', marginTop: 2 },
-  addBtn: {
-    backgroundColor: '#3DDC97', paddingHorizontal: 16, paddingVertical: 8,
-    borderRadius: 20,
-  },
-  addBtnText: { color: '#0F0F0F', fontWeight: '700', fontSize: 14 },
+
   search: {
-    backgroundColor: '#1E1E1E', color: '#FFF', marginHorizontal: 16, borderRadius: 10,
-    padding: 12, fontSize: 14, borderWidth: 1, borderColor: '#2E2E2E', marginBottom: 8,
+    backgroundColor: '#1E1E1E',
+    color: '#FFF',
+    marginHorizontal: 16,
+    borderRadius: 10,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#2E2E2E',
+    marginBottom: 8,
   },
-  donorActions: { flexDirection: 'row', gap: 8, paddingHorizontal: 16, marginBottom: 4 },
+
+  donorActions: {
+    flexDirection: 'row',
+    gap: 8,
+    paddingHorizontal: 16,
+    marginBottom: 4,
+  },
+
   actionChip: {
-    backgroundColor: '#1E1E1E', paddingHorizontal: 14, paddingVertical: 8,
-    borderRadius: 20, borderWidth: 1, borderColor: '#2E2E2E',
+    backgroundColor: '#1E1E1E',
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#2E2E2E',
   },
+
   actionChipText: { color: '#CCC', fontSize: 13 },
+
   card: {
-    backgroundColor: '#1E1E1E', borderRadius: 14, padding: 16,
-    borderWidth: 1, borderColor: '#2E2E2E',
+    backgroundColor: '#1E1E1E',
+    borderRadius: 14,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#2E2E2E',
   },
-  cardTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 },
-  foodName: { fontSize: 17, fontWeight: '700', color: '#FFF', flex: 1 },
+
+  cardTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 4,
+  },
+
+  foodName: { fontSize: 17, fontWeight: '700', color: '#FFF' },
+
   expiryBadge: { paddingHorizontal: 10, paddingVertical: 3, borderRadius: 12 },
+
   expiryText: { fontSize: 12, fontWeight: '600' },
-  quantity: { fontSize: 14, color: '#3DDC97', fontWeight: '600', marginBottom: 6 },
-  description: { fontSize: 13, color: '#AAA', lineHeight: 18, marginBottom: 10 },
-  cardFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+
+  quantity: { fontSize: 14, color: '#3DDC97', fontWeight: '600' },
+
+  description: { fontSize: 13, color: '#AAA', marginVertical: 6 },
+
+  cardFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+
   address: { fontSize: 12, color: '#777', flex: 1 },
+
   donor: { fontSize: 12, color: '#555' },
+
   empty: { alignItems: 'center', marginTop: 60 },
+
   emptyIcon: { fontSize: 48, marginBottom: 12 },
-  emptyText: { color: '#555', fontSize: 15, textAlign: 'center' },
+
+  emptyText: { color: '#555', fontSize: 15 },
+
+  /* BOTÃO */
+  fab: {
+    position: 'absolute',
+    bottom: 30,
+    alignSelf: 'center',
+    backgroundColor: '#3DDC97',
+    borderRadius: 30,
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    elevation: 6,
+  },
+
+  fabContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+
+  fabLabel: {
+    color: '#0F0F0F',
+    fontSize: 15,
+    fontWeight: '700',
+  },
+
+  fabPlus: {
+    color: '#0F0F0F',
+    fontSize: 20,
+    fontWeight: '700',
+  },
 });
