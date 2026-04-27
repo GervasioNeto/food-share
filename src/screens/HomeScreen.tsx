@@ -4,6 +4,7 @@ import {
   ActivityIndicator, RefreshControl, TextInput,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -42,7 +43,7 @@ export default function HomeScreen({ navigation }: any) {
     setRefreshing(false);
   }, []);
 
-  useEffect(() => { fetchDonations(); }, [fetchDonations]);
+  useFocusEffect(useCallback(() => { fetchDonations(); }, [fetchDonations]));
 
   useEffect(() => {
     if (!search.trim()) { setFiltered(donations); return; }
