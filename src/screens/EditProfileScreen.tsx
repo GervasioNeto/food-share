@@ -16,6 +16,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import * as ImagePicker from "expo-image-picker";
 import { supabase } from "../lib/supabase";
 import { useAuth } from "../contexts/AuthContext";
+import { showToast } from "../components/Toast";
 
 const ROLES = [
   { value: "receiver", label: "Receptor", icon: "🫂" },
@@ -25,7 +26,7 @@ const ROLES = [
 type Role = "donor" | "receiver";
 
 export default function EditProfileScreen({ navigation }: any) {
-  const { user } = useAuth();
+  const { user, refreshProfile } = useAuth(); // ✅ ADICIONADO
 
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -91,10 +92,8 @@ export default function EditProfileScreen({ navigation }: any) {
   async function uploadAvatar(): Promise<string | null> {
     if (!avatarUri || !user) return avatarUrl;
 
-    // Pega a extensão do URI original, mas ignora se for um blob URI
     const uriParts = avatarUri.split(".");
     const lastPart = uriParts[uriParts.length - 1];
-    // Se a extensão contiver "/", é um blob URI sem extensão real
     const ext =
       lastPart && !lastPart.includes("/") ? lastPart.split("?")[0] : "jpg";
 
@@ -103,7 +102,6 @@ export default function EditProfileScreen({ navigation }: any) {
     const response = await fetch(avatarUri);
     const blob = await response.blob();
 
-    // Usa o contentType real do blob quando disponível
     const contentType =
       blob.type && blob.type !== "application/octet-stream"
         ? blob.type
@@ -118,6 +116,7 @@ export default function EditProfileScreen({ navigation }: any) {
     const { data } = supabase.storage.from("avatars").getPublicUrl(fileName);
     return data.publicUrl;
   }
+
   async function handleSave() {
     if (!name.trim()) {
       Alert.alert("Atenção", "O nome não pode estar vazio.");
@@ -148,15 +147,22 @@ export default function EditProfileScreen({ navigation }: any) {
 
       if (error) throw error;
 
-      Alert.alert(
+      // ✅ ATUALIZA CONTEXTO
+      await refreshProfile();
+
+      showToast.success(
         "Perfil atualizado!",
         "Suas informações foram salvas com sucesso.",
-        [{ text: "OK", onPress: () => navigation.goBack() }],
+        "bottom"
       );
+
+      navigation.goBack();
+
     } catch (err: any) {
-      Alert.alert(
+      showToast.error(
         "Erro",
         err.message ?? "Não foi possível salvar as alterações.",
+        "bottom"
       );
     } finally {
       setLoading(false);

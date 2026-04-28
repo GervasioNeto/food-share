@@ -20,6 +20,7 @@ type AuthContextData = {
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (data: SignUpData) => Promise<void>;
   signOut: () => Promise<void>;
+  refreshProfile: () => Promise<void>; // ✅ ADICIONADO
 };
 
 type SignUpData = {
@@ -63,7 +64,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       .select('*')
       .eq('id', userId)
       .single();
+
     if (data) setProfile(data);
+  }
+
+  // ✅ NOVA FUNÇÃO (ESSENCIAL)
+  async function refreshProfile() {
+    if (!user) return;
+    await fetchProfile(user.id);
   }
 
   async function signIn(email: string, password: string) {
@@ -92,7 +100,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, profile, session, loading, signIn, signUp, signOut }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        profile,
+        session,
+        loading,
+        signIn,
+        signUp,
+        signOut,
+        refreshProfile, // ✅ EXPORTADO
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
