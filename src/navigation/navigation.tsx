@@ -1,5 +1,7 @@
 import React from "react";
 import { NavigationContainer } from "@react-navigation/native";
+import { Toast } from "../components/Toast";
+import { toastConfig } from "../components/Toast/toastConfig";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Text, View } from "react-native";
@@ -108,8 +110,11 @@ export default function Navigation() {
   if (loading) return null;
 
   return (
-    <NavigationContainer>
-      {session ? <AppStack /> : <AuthStack />}
-    </NavigationContainer>
+    <>
+      <NavigationContainer>
+        {session ? <AppStack /> : <AuthStack />}
+      </NavigationContainer>
+      <Toast config={toastConfig} />
+    </>
   );
 }

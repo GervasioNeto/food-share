@@ -7,6 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
+import { showToast } from '../components/Toast';
 
 const UNITS = ['kg', 'g', 'litros', 'unidades', 'caixas', 'sacos'];
 
@@ -77,8 +78,11 @@ export default function NewDonationScreen({ navigation }: any) {
       ]);
     } catch (err: any) {
       Alert.alert('Erro', err.message ?? 'Não foi possível criar a doação.');
+      showToast.error('Erro ao criar doação', err.message ?? 'Tente novamente mais tarde.', 'bottom');
     } finally {
       setLoading(false);
+      showToast.success('Doação publicada com sucesso!', 'Sua doação já está visível para todos', 'bottom');
+      navigation.goBack();
     }
   }
 
