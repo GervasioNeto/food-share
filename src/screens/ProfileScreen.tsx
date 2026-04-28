@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -11,6 +11,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "../contexts/AuthContext";
 import { supabase } from "../lib/supabase";
+import { useFocusEffect } from "@react-navigation/native";
 
 type Stats = {
   total: number;
@@ -26,24 +27,37 @@ export default function ProfileScreen({ navigation }: any) {
     kg_donated: 0,
   });
 
-  useEffect(() => {
+  // 🔹 função extraída (mesma lógica original)
+  const loadStats = async () => {
     if (!user) return;
-    async function loadStats() {
-      const { data } = await supabase
-        .from("donations")
-        .select("status, quantity")
-        .eq("donor_id", user!.id);
-      if (data) {
-        const total = data.length;
-        const completed = data.filter((d) => d.status === "completed").length;
-        const kg_donated = data
-          .filter((d) => d.status === "completed")
-          .reduce((acc, d) => acc + (Number(d.quantity) || 0), 0);
-        setStats({ total, completed, kg_donated });
-      }
+
+    const { data } = await supabase
+      .from("donations")
+      .select("status, quantity")
+      .eq("donor_id", user!.id);
+
+    if (data) {
+      const total = data.length;
+      const completed = data.filter((d) => d.status === "completed").length;
+      const kg_donated = data
+        .filter((d) => d.status === "completed")
+        .reduce((acc, d) => acc + (Number(d.quantity) || 0), 0);
+
+      setStats({ total, completed, kg_donated });
     }
+  };
+
+  // 🔹 mantém comportamento original
+  useEffect(() => {
     loadStats();
   }, [user]);
+
+  // 🔹 NOVO: atualiza ao voltar pra tela
+  useFocusEffect(
+    useCallback(() => {
+      loadStats();
+    }, [user])
+  );
 
   function handleSignOut() {
     if (Platform.OS === "web") {
@@ -101,7 +115,10 @@ export default function ProfileScreen({ navigation }: any) {
                 style={[
                   s.progressFill,
                   {
-                    width: `${Math.min((stats.completed / Math.max(stats.total, 1)) * 100, 100)}%`,
+                    width: `${Math.min(
+                      (stats.completed / Math.max(stats.total, 1)) * 100,
+                      100
+                    )}%`,
                   },
                 ]}
               />

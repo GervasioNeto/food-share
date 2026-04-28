@@ -9,11 +9,12 @@ type Role = 'donor' | 'receiver';
 
 export default function RegisterScreen({ navigation }: any) {
   const { signUp } = useAuth();
+
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
-  const [address, setAddress] = useState('');
+  const [address, setAddress] = useState(''); //
   const [role, setRole] = useState<Role>('receiver');
   const [loading, setLoading] = useState(false);
 
@@ -22,9 +23,17 @@ export default function RegisterScreen({ navigation }: any) {
       Alert.alert('Atenção', 'Nome, e-mail e senha são obrigatórios.');
       return;
     }
+
     setLoading(true);
     try {
-      await signUp({ email: email.trim(), password, name, phone, role, address });
+      await signUp({
+        email: email.trim(),
+        password,
+        name,
+        phone,
+        role,
+        ...(role === 'receiver' && { address }),
+      });
     } catch (err: any) {
       Alert.alert('Erro ao cadastrar', err.message ?? 'Tente novamente.');
     } finally {
@@ -60,20 +69,54 @@ export default function RegisterScreen({ navigation }: any) {
           ))}
         </View>
 
-        <Field label="Nome completo" value={name} onChange={setName} placeholder="Seu nome" />
-        <Field label="E-mail" value={email} onChange={setEmail} placeholder="seu@email.com"
-          keyboard="email-address" autoCapitalize="none" />
-        <Field label="Telefone" value={phone} onChange={setPhone} placeholder="(85) 99999-9999"
-          keyboard="phone-pad" />
-        <Field label="Senha" value={password} onChange={setPassword} placeholder="Mínimo 6 caracteres"
-          secure />
-        <Field label="Endereço (opcional)" value={address} onChange={setAddress}
-          placeholder="Rua, número, bairro" />
+        <Field
+          label="Nome completo"
+          value={name}
+          onChange={setName}
+          placeholder="Seu nome"
+        />
+
+        <Field
+          label="E-mail"
+          value={email}
+          onChange={setEmail}
+          placeholder="seu@email.com"
+          keyboard="email-address"
+          autoCapitalize="none"
+        />
+
+        <Field
+          label="Telefone"
+          value={phone}
+          onChange={setPhone}
+          placeholder="(85) 99999-9999"
+          keyboard="phone-pad"
+        />
+
+        <Field
+          label="Senha"
+          value={password}
+          onChange={setPassword}
+          placeholder="Mínimo 6 caracteres"
+          secure
+        />
+
+      
+        {role === 'receiver' && (
+          <Field
+            label="Endereço"
+            value={address}
+            onChange={setAddress}
+            placeholder="Rua, número, bairro"
+          />
+        )}
 
         <TouchableOpacity style={s.btn} onPress={handleRegister} disabled={loading}>
-          {loading
-            ? <ActivityIndicator color="#0F0F0F" />
-            : <Text style={s.btnText}>Criar conta</Text>}
+          {loading ? (
+            <ActivityIndicator color="#0F0F0F" />
+          ) : (
+            <Text style={s.btnText}>Criar conta</Text>
+          )}
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => navigation.goBack()}>
@@ -86,7 +129,15 @@ export default function RegisterScreen({ navigation }: any) {
   );
 }
 
-function Field({ label, value, onChange, placeholder, keyboard, autoCapitalize, secure }: any) {
+function Field({
+  label,
+  value,
+  onChange,
+  placeholder,
+  keyboard,
+  autoCapitalize,
+  secure,
+}: any) {
   return (
     <View style={{ marginBottom: 12 }}>
       <Text style={s.label}>{label}</Text>
@@ -113,20 +164,34 @@ const s = StyleSheet.create({
   sectionLabel: { color: '#CCC', fontSize: 13, marginBottom: 8 },
   roleRow: { flexDirection: 'row', gap: 12, marginBottom: 20 },
   roleBtn: {
-    flex: 1, padding: 14, borderRadius: 10, borderWidth: 1,
-    borderColor: '#2E2E2E', alignItems: 'center', backgroundColor: '#1E1E1E',
+    flex: 1,
+    padding: 14,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#2E2E2E',
+    alignItems: 'center',
+    backgroundColor: '#1E1E1E',
   },
   roleBtnActive: { borderColor: '#3DDC97', backgroundColor: '#1a2e25' },
   roleBtnText: { color: '#888', fontWeight: '600' },
   roleBtnTextActive: { color: '#3DDC97' },
   label: { color: '#CCC', fontSize: 13, marginBottom: 4 },
   input: {
-    backgroundColor: '#1E1E1E', color: '#FFF', borderRadius: 10, padding: 14,
-    fontSize: 15, borderWidth: 1, borderColor: '#2E2E2E',
+    backgroundColor: '#1E1E1E',
+    color: '#FFF',
+    borderRadius: 10,
+    padding: 14,
+    fontSize: 15,
+    borderWidth: 1,
+    borderColor: '#2E2E2E',
   },
   btn: {
-    backgroundColor: '#3DDC97', borderRadius: 10, padding: 16,
-    alignItems: 'center', marginTop: 8, marginBottom: 16,
+    backgroundColor: '#3DDC97',
+    borderRadius: 10,
+    padding: 16,
+    alignItems: 'center',
+    marginTop: 8,
+    marginBottom: 16,
   },
   btnText: { color: '#0F0F0F', fontWeight: '700', fontSize: 16 },
   link: { color: '#888', textAlign: 'center', fontSize: 14 },
