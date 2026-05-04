@@ -38,6 +38,7 @@ export default function NewDonationScreen({ navigation }: any) {
   async function handleSubmit() {
     if (!foodName || !quantity || !expiryDate || !pickupAddress) {
       Alert.alert('Atenção', 'Preencha todos os campos obrigatórios.');
+      showToast.error('Campos obrigatórios faltando', 'Preencha nome, quantidade, validade e endereço.', 'bottom');
       return;
     }
     if (!user) return;
