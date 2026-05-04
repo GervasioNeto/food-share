@@ -4,6 +4,7 @@ import {
   KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator, Alert,
 } from 'react-native';
 import { useAuth } from '../contexts/AuthContext';
+import { showToast } from '../components/Toast';
 
 type Role = 'donor' | 'receiver';
 
@@ -21,6 +22,7 @@ export default function RegisterScreen({ navigation }: any) {
   async function handleRegister() {
     if (!name || !email || !password) {
       Alert.alert('Atenção', 'Nome, e-mail e senha são obrigatórios.');
+      showToast.error('Preencha os campos obrigatórios.', 'Email, senha e nome são necessários.', 'bottom');
       return;
     }
 
@@ -37,6 +39,7 @@ export default function RegisterScreen({ navigation }: any) {
     } catch (err: any) {
       Alert.alert('Erro ao cadastrar', err.message ?? 'Tente novamente.');
     } finally {
+      showToast.success('Conta criada!', 'Bem-vindo à rede FoodShare!', 'bottom');
       setLoading(false);
     }
   }
