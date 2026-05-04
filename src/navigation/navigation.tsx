@@ -39,6 +39,7 @@ import DonationDetailScreen from "../screens/DonationDetailScreen";
 import NewDonationScreen from "../screens/NewDonationScreen";
 import MyDonationsScreen from "../screens/MyDonationsScreen";
 import RequestsScreen from "../screens/RequestsScreen";
+import NotificationDetailScreen from "../screens/NotificationDetailScreen";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -89,6 +90,10 @@ function AppStack() {
       <Stack.Screen name="DonationDetail" component={DonationDetailScreen} />
       <Stack.Screen name="NewDonation" component={NewDonationScreen} />
       <Stack.Screen name="MyDonations" component={MyDonationsScreen} />
+      <Stack.Screen
+        name="NotificationDetail"
+        component={NotificationDetailScreen}
+      />
       <Stack.Screen name="Requests" component={RequestsScreen} />
       <Stack.Screen name="EditProfile" component={EditProfileScreen} />
     </Stack.Navigator>
