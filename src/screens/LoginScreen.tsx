@@ -4,6 +4,7 @@ import {
   KeyboardAvoidingView, Platform, ActivityIndicator, Alert,
 } from 'react-native';
 import { useAuth } from '../contexts/AuthContext';
+import { showToast } from '../components/Toast';
 
 export default function LoginScreen({ navigation }: any) {
   const { signIn } = useAuth();
@@ -22,6 +23,7 @@ export default function LoginScreen({ navigation }: any) {
     } catch (err: any) {
       Alert.alert('Erro ao entrar', err.message ?? 'Verifique suas credenciais.');
     } finally {
+      showToast.success('Bem-vindo de volta!', 'Login realizado com sucesso.', 'top');
       setLoading(false);
     }
   }

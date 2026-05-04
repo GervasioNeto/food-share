@@ -120,11 +120,19 @@ export default function EditProfileScreen({ navigation }: any) {
   async function handleSave() {
     if (!name.trim()) {
       Alert.alert("Atenção", "O nome não pode estar vazio.");
+      showToast.error("Atenção", "O nome é obrigatório.", "bottom");
       return;
     }
 
     if (!phone.trim()) {
       Alert.alert("Atenção", "O telefone não pode estar vazio.");
+      showToast.error("Atenção", "O telefone é obrigatório.", "bottom");
+      return;
+    }
+
+    if (role === "donor" && !address.trim()) {
+      Alert.alert("Atenção", "O endereço é obrigatório para doadores.");
+      showToast.error("Atenção", "O endereço é obrigatório para doadores.", "bottom");
       return;
     }
 
