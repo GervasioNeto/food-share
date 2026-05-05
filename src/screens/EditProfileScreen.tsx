@@ -251,7 +251,7 @@ export default function EditProfileScreen({ navigation }: any) {
             keyboardType="phone-pad"
           />
 
-          <Text style={s.label}>Endereço (opcional)</Text>
+          <Text style={s.label}>Endereço *</Text>
           <TextInput
             style={s.input}
             value={address}

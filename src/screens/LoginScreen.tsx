@@ -15,15 +15,16 @@ export default function LoginScreen({ navigation }: any) {
   async function handleLogin() {
     if (!email || !password) {
       Alert.alert('Atenção', 'Preencha e-mail e senha.');
+      showToast.error('Atenção', 'Preencha e-mail e senha.', 'bottom');
       return;
     }
     setLoading(true);
     try {
       await signIn(email.trim(), password);
     } catch (err: any) {
+      showToast.error('Erro ao entrar', err.message ?? 'Verifique suas credenciais.', 'bottom');
       Alert.alert('Erro ao entrar', err.message ?? 'Verifique suas credenciais.');
     } finally {
-      showToast.success('Bem-vindo de volta!', 'Login realizado com sucesso.', 'top');
       setLoading(false);
     }
   }
