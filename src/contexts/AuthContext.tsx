@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { Session, User } from '@supabase/supabase-js';
+import { showToast } from '../components/Toast';
 
 type Profile = {
   id: string;
@@ -68,7 +69,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (data) setProfile(data);
   }
 
-  // ✅ NOVA FUNÇÃO (ESSENCIAL)
   async function refreshProfile() {
     if (!user) return;
     await fetchProfile(user.id);
@@ -76,11 +76,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   async function signIn(email: string, password: string) {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
+    showToast.success('Bem-vindo de volta!', 'Login realizado com sucesso.', 'bottom');
     if (error) throw error;
   }
 
   async function signUp({ email, password, name, phone, role, address }: SignUpData) {
     const { data, error } = await supabase.auth.signUp({ email, password });
+    showToast.success('Conta criada!', 'Bem-vindo à rede FoodShare!', 'bottom');
     if (error) throw error;
 
     if (data.user) {
@@ -97,6 +99,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   async function signOut() {
     await supabase.auth.signOut();
+    showToast.success("Desconectado", "Você saiu da sua conta com sucesso.", "bottom");
   }
 
   return (
