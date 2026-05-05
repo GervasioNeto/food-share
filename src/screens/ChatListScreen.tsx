@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import {
   View,
   Text,
@@ -76,6 +76,22 @@ export default function ChatListScreen() {
       fetchRooms();
     }, [fetchRooms])
   );
+
+  // subscription em tempo real: qualquer mensagem nova recarrega a lista
+  useEffect(() => {
+    if (!profile) return;
+
+    const channel = supabase
+      .channel("chatlist_messages")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "messages" },
+        () => { fetchRooms(); }
+      )
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [profile, fetchRooms]);
 
   function getOtherPersonName(room: ChatRoom): string {
     if (!profile) return "";
