@@ -133,6 +133,16 @@ export default function RequestsScreen({ navigation }: any) {
           .from("donations")
           .update({ status: "reserved" })
           .eq("id", request.donation_id);
+
+        if (user) {
+          const { error: chatError } = await supabase.from("chat_rooms").insert({
+            request_id: id,
+            donor_id: user.id,
+            requester_id: request.requester_id,
+            donation_id: request.donation_id,
+          });
+          if (chatError) console.error("chat_room insert error:", chatError.message);
+        }
       }
 
       await supabase.from("notifications").insert({
@@ -143,7 +153,7 @@ export default function RequestsScreen({ navigation }: any) {
             : "Solicitação recusada",
         body:
           status === "accepted"
-            ? `Sua solicitação de "${request.donations?.food_name}" foi aceita. Entre em contato com o doador.`
+            ? `Sua solicitação de "${request.donations?.food_name}" foi aceita. Acesse a aba Chats para combinar a entrega.`
             : `Sua solicitação de "${request.donations?.food_name}" não foi aceita desta vez.`,
         type: status,
         read: false,
