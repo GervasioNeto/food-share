@@ -9,6 +9,7 @@ import {
   ScrollView,
   Image,
   Platform,
+  Linking,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { supabase } from "../lib/supabase";
@@ -16,18 +17,20 @@ import { useAuth } from "../contexts/AuthContext";
 
 type RequestStatus = "pending" | "accepted" | "rejected";
 
+type ContactInfo = {
+  name: string;
+  phone: string | null;
+  address: string | null;
+  avatar_url: string | null;
+};
+
 type RequestDetail = {
   id: string;
   status: RequestStatus;
   created_at: string;
   donation_id: string;
   requester_id: string;
-  requester: {
-    name: string;
-    phone: string | null;
-    address: string | null;
-    avatar_url: string | null;
-  };
+  requester: ContactInfo;
   donation: {
     id: string;
     food_name: string;
@@ -36,6 +39,7 @@ type RequestDetail = {
     pickup_address: string;
     expiry_date: string;
     image_url: string | null;
+    donor: ContactInfo | null;
   };
 };
 
@@ -48,12 +52,16 @@ const STATUS_CONFIG: Record<
   rejected: { label: "Recusada", color: "#FF4D4D", bg: "#FF4D4D22" },
 };
 
+// Tipos de notificação vistos pelo RECEPTOR (mostram info do doador)
+const RECEIVER_VIEW_TYPES = new Set(["accepted", "rejected"]);
+
 export default function NotificationDetailScreen({ route, navigation }: any) {
   const { notificationId } = route.params;
   const { user } = useAuth();
 
   const [request, setRequest] = useState<RequestDetail | null>(null);
   const [notifTitle, setNotifTitle] = useState("");
+  const [notifType, setNotifType] = useState("");
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<
     "accepted" | "rejected" | null
@@ -65,30 +73,31 @@ export default function NotificationDetailScreen({ route, navigation }: any) {
 
   async function loadData() {
     try {
-      // 1. Busca a notificação para pegar o request_id
       const { data: notif, error: notifErr } = await supabase
         .from("notifications")
-        .select("title, request_id")
+        .select("title, type, request_id")
         .eq("id", notificationId)
         .single();
 
       if (notifErr) throw notifErr;
       setNotifTitle(notif.title);
+      setNotifType(notif.type ?? "");
 
       if (!notif.request_id) {
-        // Notificação sem request vinculado (ex: tipo 'available', 'general')
         setLoading(false);
         return;
       }
 
-      // 2. Busca o request com dados do solicitante e da doação
       const { data, error } = await supabase
         .from("requests")
         .select(
           `
           id, status, created_at, donation_id, requester_id,
           requester:requester_id ( name, phone, address, avatar_url ),
-          donation:donation_id ( id, food_name, quantity, unit, pickup_address, expiry_date, image_url )
+          donation:donation_id (
+            id, food_name, quantity, unit, pickup_address, expiry_date, image_url,
+            donor:donor_id ( name, phone, address, avatar_url )
+          )
         `,
         )
         .eq("id", notif.request_id)
@@ -105,7 +114,6 @@ export default function NotificationDetailScreen({ route, navigation }: any) {
 
   async function handleAction(action: "accepted" | "rejected") {
     if (!request || !user) return;
-
     const label = action === "accepted" ? "aceitar" : "recusar";
 
     const confirmed =
@@ -167,6 +175,7 @@ export default function NotificationDetailScreen({ route, navigation }: any) {
             : `Sua solicitação de "${request.donation.food_name}" não foi aceita desta vez.`,
         type: action,
         read: false,
+        request_id: request.id,
       });
 
       setRequest((prev) => (prev ? { ...prev, status: action } : prev));
@@ -221,7 +230,10 @@ export default function NotificationDetailScreen({ route, navigation }: any) {
       .toUpperCase();
   }
 
-  // ── Loading ────────────────────────────────────────
+  function openPhone(phone: string) {
+    Linking.openURL(`tel:${phone}`);
+  }
+
   if (loading) {
     return (
       <SafeAreaView style={s.safe}>
@@ -234,7 +246,6 @@ export default function NotificationDetailScreen({ route, navigation }: any) {
     );
   }
 
-  // ── Sem request vinculado ──────────────────────────
   if (!request) {
     return (
       <SafeAreaView style={s.safe}>
@@ -252,16 +263,21 @@ export default function NotificationDetailScreen({ route, navigation }: any) {
 
   const statusConf = STATUS_CONFIG[request.status];
   const isPending = request.status === "pending";
+  const isReceiverView = RECEIVER_VIEW_TYPES.has(notifType);
+
+  // Quem aparece no card de contato depende da perspectiva
+  const contactPerson = isReceiverView
+    ? request.donation.donor
+    : request.requester;
+  const contactLabel = isReceiverView ? "DOADOR" : "SOLICITANTE";
 
   return (
     <SafeAreaView style={s.safe}>
       <ScrollView contentContainerStyle={s.container}>
-        {/* Back */}
         <TouchableOpacity style={s.backBtn} onPress={() => navigation.goBack()}>
           <Text style={s.backText}>← Voltar</Text>
         </TouchableOpacity>
 
-        {/* Título + Status */}
         <View style={s.titleRow}>
           <Text style={s.pageTitle}>Solicitação</Text>
           <View style={[s.statusBadge, { backgroundColor: statusConf.bg }]}>
@@ -272,33 +288,29 @@ export default function NotificationDetailScreen({ route, navigation }: any) {
         </View>
         <Text style={s.pageDate}>{formatDate(request.created_at)}</Text>
 
-        {/* Card: Solicitante */}
+        {/* Card: Contato (doador ou solicitante conforme perspectiva) */}
         <View style={s.card}>
-          <Text style={s.cardLabel}>SOLICITANTE</Text>
+          <Text style={s.cardLabel}>{contactLabel}</Text>
           <View style={s.requesterRow}>
-            {request.requester.avatar_url ? (
+            {contactPerson?.avatar_url ? (
               <Image
-                source={{ uri: request.requester.avatar_url }}
+                source={{ uri: contactPerson.avatar_url }}
                 style={s.avatar}
               />
             ) : (
               <View style={s.avatarFallback}>
                 <Text style={s.avatarInitials}>
-                  {getInitials(request.requester.name)}
+                  {getInitials(contactPerson?.name ?? "?")}
                 </Text>
               </View>
             )}
             <View style={{ flex: 1 }}>
-              <Text style={s.requesterName}>{request.requester.name}</Text>
-              {request.requester.phone && (
-                <Text style={s.requesterMeta}>
-                  📞 {request.requester.phone}
-                </Text>
+              <Text style={s.requesterName}>{contactPerson?.name ?? "—"}</Text>
+              {contactPerson?.phone && (
+                <Text style={s.requesterMeta}>📞 {contactPerson.phone}</Text>
               )}
-              {request.requester.address && (
-                <Text style={s.requesterMeta}>
-                  📍 {request.requester.address}
-                </Text>
+              {contactPerson?.address && (
+                <Text style={s.requesterMeta}>📍 {contactPerson.address}</Text>
               )}
             </View>
           </View>
@@ -331,8 +343,8 @@ export default function NotificationDetailScreen({ route, navigation }: any) {
           </View>
         </View>
 
-        {/* Ações ou feedback */}
-        {isPending ? (
+        {/* Ações — só para o DOADOR em solicitações pendentes */}
+        {!isReceiverView && isPending && (
           <View style={s.actionsRow}>
             <TouchableOpacity
               style={[s.btn, s.btnReject]}
@@ -345,7 +357,6 @@ export default function NotificationDetailScreen({ route, navigation }: any) {
                 <Text style={s.btnRejectText}>✕ Recusar</Text>
               )}
             </TouchableOpacity>
-
             <TouchableOpacity
               style={[s.btn, s.btnAccept]}
               onPress={() => handleAction("accepted")}
@@ -358,12 +369,34 @@ export default function NotificationDetailScreen({ route, navigation }: any) {
               )}
             </TouchableOpacity>
           </View>
-        ) : (
+        )}
+
+        {/* Banner processado — doador após decidir */}
+        {!isReceiverView && !isPending && (
           <View style={[s.processedBanner, { borderColor: statusConf.color }]}>
             <Text style={[s.processedText, { color: statusConf.color }]}>
               {request.status === "accepted"
                 ? "✓ Você aceitou esta solicitação"
                 : "✕ Você recusou esta solicitação"}
+            </Text>
+          </View>
+        )}
+
+        {/* Banner para o RECEPTOR — aceita */}
+        {isReceiverView && request.status === "accepted" && (
+          <View style={[s.processedBanner, { borderColor: "#3DDC97" }]}>
+            <Text style={[s.processedText, { color: "#3DDC97" }]}>
+              🎉 Sua solicitação foi aceita! Entre em contato com o doador
+              acima.
+            </Text>
+          </View>
+        )}
+
+        {/* Banner para o RECEPTOR — recusada */}
+        {isReceiverView && request.status === "rejected" && (
+          <View style={[s.processedBanner, { borderColor: "#FF4D4D" }]}>
+            <Text style={[s.processedText, { color: "#FF4D4D" }]}>
+              ✕ Esta solicitação não foi aceita desta vez.
             </Text>
           </View>
         )}
@@ -375,10 +408,8 @@ export default function NotificationDetailScreen({ route, navigation }: any) {
 const s = StyleSheet.create({
   safe: { flex: 1, backgroundColor: "#0F0F0F" },
   container: { padding: 20, paddingBottom: 48 },
-
   backBtn: { marginBottom: 16 },
   backText: { color: "#3DDC97", fontSize: 15 },
-
   titleRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -387,10 +418,8 @@ const s = StyleSheet.create({
   },
   pageTitle: { fontSize: 24, fontWeight: "700", color: "#FFF" },
   pageDate: { fontSize: 13, color: "#888", marginBottom: 20 },
-
   statusBadge: { paddingHorizontal: 12, paddingVertical: 4, borderRadius: 20 },
   statusText: { fontSize: 12, fontWeight: "700" },
-
   card: {
     backgroundColor: "#1E1E1E",
     borderRadius: 14,
@@ -406,7 +435,6 @@ const s = StyleSheet.create({
     letterSpacing: 1,
     marginBottom: 12,
   },
-
   requesterRow: { flexDirection: "row", alignItems: "center", gap: 14 },
   avatar: {
     width: 56,
@@ -433,7 +461,16 @@ const s = StyleSheet.create({
     marginBottom: 4,
   },
   requesterMeta: { fontSize: 13, color: "#888", marginTop: 2 },
-
+  callBtn: {
+    marginTop: 14,
+    backgroundColor: "#1a2e25",
+    borderRadius: 10,
+    padding: 12,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#3DDC97",
+  },
+  callBtnText: { color: "#3DDC97", fontWeight: "700", fontSize: 14 },
   donationImg: {
     width: "100%",
     height: 130,
@@ -458,7 +495,6 @@ const s = StyleSheet.create({
   },
   donationQty: { fontSize: 14, color: "#3DDC97", fontWeight: "600" },
   donationMeta: { fontSize: 13, color: "#888" },
-
   actionsRow: { flexDirection: "row", gap: 12, marginTop: 8 },
   btn: {
     flex: 1,
@@ -475,7 +511,6 @@ const s = StyleSheet.create({
   btnRejectText: { color: "#FF4D4D", fontWeight: "700", fontSize: 15 },
   btnAccept: { backgroundColor: "#3DDC97" },
   btnAcceptText: { color: "#0F0F0F", fontWeight: "700", fontSize: 15 },
-
   processedBanner: {
     borderRadius: 12,
     borderWidth: 1,
@@ -483,8 +518,7 @@ const s = StyleSheet.create({
     alignItems: "center",
     marginTop: 8,
   },
-  processedText: { fontSize: 14, fontWeight: "600" },
-
+  processedText: { fontSize: 14, fontWeight: "600", textAlign: "center" },
   emptyWrapper: {
     flex: 1,
     alignItems: "center",

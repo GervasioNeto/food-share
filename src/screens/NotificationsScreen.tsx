@@ -28,8 +28,7 @@ const TYPE_ICON: Record<string, string> = {
   general: "🔔",
 };
 
-// Tipos que abrem a tela de detalhe
-const NAVIGABLE_TYPES = new Set(["request"]);
+const NAVIGABLE_TYPES = new Set(["request", "accepted", "rejected"]);
 
 export default function NotificationsScreen({ navigation }: any) {
   const { user } = useAuth();
