@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { Session, User } from '@supabase/supabase-js';
+import { showToast } from '../components/Toast';
 
 type Profile = {
   id: string;
@@ -20,6 +21,7 @@ type AuthContextData = {
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (data: SignUpData) => Promise<void>;
   signOut: () => Promise<void>;
+  refreshProfile: () => Promise<void>; // ✅ ADICIONADO
 };
 
 type SignUpData = {
@@ -63,16 +65,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       .select('*')
       .eq('id', userId)
       .single();
+
     if (data) setProfile(data);
+  }
+
+  async function refreshProfile() {
+    if (!user) return;
+    await fetchProfile(user.id);
   }
 
   async function signIn(email: string, password: string) {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
+    showToast.success('Bem-vindo de volta!', 'Login realizado com sucesso.', 'top');
     if (error) throw error;
   }
 
   async function signUp({ email, password, name, phone, role, address }: SignUpData) {
     const { data, error } = await supabase.auth.signUp({ email, password });
+    showToast.success('Conta criada!', 'Bem-vindo à rede FoodShare!', 'top');
     if (error) throw error;
 
     if (data.user) {
@@ -89,10 +99,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   async function signOut() {
     await supabase.auth.signOut();
+    showToast.success("Desconectado", "Você saiu da sua conta com sucesso.", "bottom");
   }
 
   return (
-    <AuthContext.Provider value={{ user, profile, session, loading, signIn, signUp, signOut }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        profile,
+        session,
+        loading,
+        signIn,
+        signUp,
+        signOut,
+        refreshProfile, // ✅ EXPORTADO
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

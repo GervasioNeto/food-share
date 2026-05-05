@@ -7,6 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
+import { showToast } from '../components/Toast';
 
 const UNITS = ['kg', 'g', 'litros', 'unidades', 'caixas', 'sacos'];
 
@@ -37,6 +38,7 @@ export default function NewDonationScreen({ navigation }: any) {
   async function handleSubmit() {
     if (!foodName || !quantity || !expiryDate || !pickupAddress) {
       Alert.alert('Atenção', 'Preencha todos os campos obrigatórios.');
+      showToast.error('Campos obrigatórios faltando', 'Preencha nome, quantidade, validade e endereço.', 'bottom');
       return;
     }
     if (!user) return;
@@ -77,8 +79,11 @@ export default function NewDonationScreen({ navigation }: any) {
       ]);
     } catch (err: any) {
       Alert.alert('Erro', err.message ?? 'Não foi possível criar a doação.');
+      showToast.error('Erro ao criar doação', err.message ?? 'Tente novamente mais tarde.', 'bottom');
     } finally {
       setLoading(false);
+      showToast.success('Doação publicada com sucesso!', 'Sua doação já está visível para todos', 'bottom');
+      navigation.goBack();
     }
   }
 
