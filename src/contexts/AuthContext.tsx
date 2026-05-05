@@ -76,13 +76,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   async function signIn(email: string, password: string) {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
-    showToast.success('Bem-vindo de volta!', 'Login realizado com sucesso.', 'bottom');
+    showToast.success('Bem-vindo de volta!', 'Login realizado com sucesso.', 'top');
     if (error) throw error;
   }
 
   async function signUp({ email, password, name, phone, role, address }: SignUpData) {
     const { data, error } = await supabase.auth.signUp({ email, password });
-    showToast.success('Conta criada!', 'Bem-vindo à rede FoodShare!', 'bottom');
+    showToast.success('Conta criada!', 'Bem-vindo à rede FoodShare!', 'top');
     if (error) throw error;
 
     if (data.user) {
