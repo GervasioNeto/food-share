@@ -40,6 +40,8 @@ import NewDonationScreen from "../screens/NewDonationScreen";
 import MyDonationsScreen from "../screens/MyDonationsScreen";
 import RequestsScreen from "../screens/RequestsScreen";
 import NotificationDetailScreen from "../screens/NotificationDetailScreen";
+import ChatListScreen from "../screens/ChatListScreen";
+import ChatScreen from "../screens/ChatScreen";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -52,6 +54,7 @@ function TabIcon({ name, focused }: { name: string; focused: boolean }) {
   const icons: Record<string, string> = {
     Início: "🏠",
     Mapa: "🗺️",
+    Chats: "💬",
     Alertas: "🔔",
     Perfil: "👤",
   };
@@ -77,6 +80,7 @@ function MainTabs() {
     >
       <Tab.Screen name="Início" component={HomeScreen} />
       <Tab.Screen name="Mapa" component={MapPlaceholder} />
+      <Tab.Screen name="Chats" component={ChatListScreen} />
       <Tab.Screen name="Alertas" component={NotificationsScreen} />
       <Tab.Screen name="Perfil" component={ProfileScreen} />
     </Tab.Navigator>
@@ -96,6 +100,7 @@ function AppStack() {
       />
       <Stack.Screen name="Requests" component={RequestsScreen} />
       <Stack.Screen name="EditProfile" component={EditProfileScreen} />
+      <Stack.Screen name="Chat" component={ChatScreen} />
     </Stack.Navigator>
   );
 }
