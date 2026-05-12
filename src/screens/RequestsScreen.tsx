@@ -99,7 +99,6 @@ export default function RequestsScreen({ navigation }: any) {
     request: Request,
   ) {
     const actionLabel = status === "accepted" ? "Aceitar" : "Recusar";
-
     Alert.alert(
       `${actionLabel} solicitação`,
       `${actionLabel} pedido de ${request.profiles?.name ?? "usuário"}?`,
