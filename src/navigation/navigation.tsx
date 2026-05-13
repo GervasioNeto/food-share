@@ -4,35 +4,14 @@ import { Toast } from "../components/Toast";
 import { toastConfig } from "../components/Toast/toastConfig";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { Text, View } from "react-native";
+import { Text } from "react-native";
 import { useAuth } from "../contexts/AuthContext";
 
 import LoginScreen from "../screens/LoginScreen";
 import RegisterScreen from "../screens/RegisterScreen";
 import HomeScreen from "../screens/HomeScreen";
 import EditProfileScreen from "../screens/EditProfileScreen";
-// import MapScreen from '../screens/MapScreen'; // TODO: habilitar após resolver compatibilidade web
-
-function MapPlaceholder() {
-  return (
-    <View
-      style={{
-        flex: 1,
-        backgroundColor: "#0F0F0F",
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-    >
-      <Text style={{ fontSize: 48, marginBottom: 12 }}>🗺️</Text>
-      <Text style={{ color: "#3DDC97", fontSize: 18, fontWeight: "700" }}>
-        Mapa em breve
-      </Text>
-      <Text style={{ color: "#666", fontSize: 13, marginTop: 6 }}>
-        Funcionalidade em desenvolvimento
-      </Text>
-    </View>
-  );
-}
+import MapScreen from '../screens/MapScreen';
 import NotificationsScreen from "../screens/NotificationsScreen";
 import ProfileScreen from "../screens/ProfileScreen";
 import DonationDetailScreen from "../screens/DonationDetailScreen";
@@ -79,7 +58,7 @@ function MainTabs() {
       })}
     >
       <Tab.Screen name="Início" component={HomeScreen} />
-      <Tab.Screen name="Mapa" component={MapPlaceholder} />
+      <Tab.Screen name="Mapa" component={MapScreen} />
       <Tab.Screen name="Chats" component={ChatListScreen} />
       <Tab.Screen name="Alertas" component={NotificationsScreen} />
       <Tab.Screen name="Perfil" component={ProfileScreen} />
