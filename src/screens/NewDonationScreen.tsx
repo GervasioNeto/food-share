@@ -121,7 +121,7 @@ export default function NewDonationScreen({ navigation }: any) {
     <SafeAreaView style={s.safe}>
       <KeyboardAvoidingView
         style={{ flex: 1 }}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         <ScrollView contentContainerStyle={s.container} keyboardShouldPersistTaps="handled">
           <TouchableOpacity style={s.back} onPress={() => navigation.goBack()}>
