@@ -78,7 +78,7 @@ export default function RegisterScreen({ navigation }: any) {
   return (
     <KeyboardAvoidingView
       style={{ flex: 1, backgroundColor: '#0F0F0F' }}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <ScrollView
         contentContainerStyle={s.container}

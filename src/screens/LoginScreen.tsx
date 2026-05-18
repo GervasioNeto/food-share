@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
-  KeyboardAvoidingView, Platform, ActivityIndicator, Alert,
+  KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator, Alert,
 } from 'react-native';
 
 import { Ionicons } from '@expo/vector-icons';
@@ -46,82 +46,86 @@ export default function LoginScreen({ navigation }: any) {
 
   return (
     <KeyboardAvoidingView
-      style={s.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      style={{ flex: 1, backgroundColor: '#0F0F0F' }}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <View style={s.header}>
-        <Text style={s.logo}>🥦</Text>
-        <Text style={s.brand}>FoodShare</Text>
-        <Text style={s.subtitle}>
-          Conectando quem tem com quem precisa
-        </Text>
-      </View>
-
-      <View style={s.form}>
-        <Text style={s.label}>E-mail</Text>
-
-        <TextInput
-          style={s.input}
-          placeholder="seu@email.com"
-          placeholderTextColor="#555"
-          keyboardType="email-address"
-          autoCapitalize="none"
-          value={email}
-          onChangeText={setEmail}
-        />
-
-        <Text style={s.label}>Senha</Text>
-
-        <View style={s.passwordContainer}>
-          <TextInput
-            style={s.passwordInput}
-            placeholder="••••••••"
-            placeholderTextColor="#555"
-            secureTextEntry={!showPassword}
-            value={password}
-            onChangeText={setPassword}
-          />
-
-          <TouchableOpacity
-            onPress={() => setShowPassword(!showPassword)}
-          >
-            <Ionicons
-              name={showPassword ? 'eye-off' : 'eye'}
-              size={22}
-              color="#888"
-            />
-          </TouchableOpacity>
+      <ScrollView
+        contentContainerStyle={s.container}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View style={s.header}>
+          <Text style={s.logo}>🥦</Text>
+          <Text style={s.brand}>FoodShare</Text>
+          <Text style={s.subtitle}>
+            Conectando quem tem com quem precisa
+          </Text>
         </View>
 
-        <TouchableOpacity
-          style={s.btn}
-          onPress={handleLogin}
-          disabled={loading}
-        >
-          {loading ? (
-            <ActivityIndicator color="#0F0F0F" />
-          ) : (
-            <Text style={s.btnText}>Entrar</Text>
-          )}
-        </TouchableOpacity>
+        <View style={s.form}>
+          <Text style={s.label}>E-mail</Text>
 
-        <TouchableOpacity
-          onPress={() => navigation.navigate('Register')}
-        >
-          <Text style={s.link}>
-            Não tem conta?{' '}
-            <Text style={s.linkAccent}>Cadastre-se</Text>
-          </Text>
-        </TouchableOpacity>
-      </View>
+          <TextInput
+            style={s.input}
+            placeholder="seu@email.com"
+            placeholderTextColor="#555"
+            keyboardType="email-address"
+            autoCapitalize="none"
+            value={email}
+            onChangeText={setEmail}
+          />
+
+          <Text style={s.label}>Senha</Text>
+
+          <View style={s.passwordContainer}>
+            <TextInput
+              style={s.passwordInput}
+              placeholder="••••••••"
+              placeholderTextColor="#555"
+              secureTextEntry={!showPassword}
+              value={password}
+              onChangeText={setPassword}
+            />
+
+            <TouchableOpacity
+              onPress={() => setShowPassword(!showPassword)}
+            >
+              <Ionicons
+                name={showPassword ? 'eye-off' : 'eye'}
+                size={22}
+                color="#888"
+              />
+            </TouchableOpacity>
+          </View>
+
+          <TouchableOpacity
+            style={s.btn}
+            onPress={handleLogin}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator color="#0F0F0F" />
+            ) : (
+              <Text style={s.btnText}>Entrar</Text>
+            )}
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() => navigation.navigate('Register')}
+          >
+            <Text style={s.link}>
+              Não tem conta?{' '}
+              <Text style={s.linkAccent}>Cadastre-se</Text>
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 }
 
 const s = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: '#0F0F0F',
+    flexGrow: 1,
     justifyContent: 'center',
     padding: 24,
   },
