@@ -5,6 +5,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
+import * as Location from 'expo-location';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { showToast } from '../components/Toast';
@@ -35,6 +36,18 @@ export default function NewDonationScreen({ navigation }: any) {
     if (!result.canceled) setImageUri(result.assets[0].uri);
   }
 
+  async function geocodeAddress(address: string): Promise<{ lat: number; lng: number } | null> {
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') return null;
+      const results = await Location.geocodeAsync(address);
+      if (results.length === 0) return null;
+      return { lat: results[0].latitude, lng: results[0].longitude };
+    } catch {
+      return null;
+    }
+  }
+
   async function handleSubmit() {
     if (!foodName || !quantity || !expiryDate || !pickupAddress) {
       Alert.alert('Atenção', 'Preencha todos os campos obrigatórios.');
@@ -61,6 +74,8 @@ export default function NewDonationScreen({ navigation }: any) {
         }
       }
 
+      const coords = await geocodeAddress(pickupAddress.trim());
+
       const { error } = await supabase.from('donations').insert({
         donor_id: user.id,
         food_name: foodName.trim(),
@@ -71,6 +86,8 @@ export default function NewDonationScreen({ navigation }: any) {
         pickup_address: pickupAddress.trim(),
         status: 'available',
         image_url,
+        lat: coords?.lat ?? null,
+        lng: coords?.lng ?? null,
       });
 
       if (error) throw error;
