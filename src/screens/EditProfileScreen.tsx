@@ -26,7 +26,7 @@ const ROLES = [
 type Role = "donor" | "receiver";
 
 export default function EditProfileScreen({ navigation }: any) {
-  const { user, refreshProfile } = useAuth(); // ✅ ADICIONADO
+  const { user, refreshProfile } = useAuth(); 
 
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -155,7 +155,7 @@ export default function EditProfileScreen({ navigation }: any) {
 
       if (error) throw error;
 
-      // ✅ ATUALIZA CONTEXTO
+    
       await refreshProfile();
 
       showToast.success(
