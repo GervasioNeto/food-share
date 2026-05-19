@@ -73,6 +73,15 @@ export default function LoginScreen({ navigation }: any) {
 
         <Text style={s.label}>Senha</Text>
 
+        <TextInput
+          style={s.input}
+          placeholder="••••••••"
+          placeholderTextColor="#555"
+          secureTextEntry
+          value={password}
+          onChangeText={setPassword}
+        />
+
         <TouchableOpacity onPress={() => navigation.navigate("ForgotPassword")}>
           <Text style={s.forgotLink}>Esqueci minha senha</Text>
         </TouchableOpacity>
