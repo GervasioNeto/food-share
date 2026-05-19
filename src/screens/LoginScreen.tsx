@@ -1,26 +1,28 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
-  View, Text, TextInput, TouchableOpacity, StyleSheet,
-  KeyboardAvoidingView, Platform, ActivityIndicator, Alert,
-} from 'react-native';
-
-import { Ionicons } from '@expo/vector-icons';
-
-import { useAuth } from '../contexts/AuthContext';
-import { showToast } from '../components/Toast';
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  KeyboardAvoidingView,
+  Platform,
+  ActivityIndicator,
+  Alert,
+} from "react-native";
+import { useAuth } from "../contexts/AuthContext";
+import { showToast } from "../components/Toast";
 
 export default function LoginScreen({ navigation }: any) {
   const { signIn } = useAuth();
-
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
   async function handleLogin() {
     if (!email || !password) {
-      Alert.alert('Atenção', 'Preencha e-mail e senha.');
-      showToast.error('Atenção', 'Preencha e-mail e senha.', 'bottom');
+      Alert.alert("Atenção", "Preencha e-mail e senha.");
+      showToast.error("Atenção", "Preencha e-mail e senha.", "bottom");
       return;
     }
 
@@ -30,14 +32,13 @@ export default function LoginScreen({ navigation }: any) {
       await signIn(email.trim(), password);
     } catch (err: any) {
       showToast.error(
-        'Erro ao entrar',
-        err.message ?? 'Verifique suas credenciais.',
-        'bottom'
+        "Erro ao entrar",
+        err.message ?? "Verifique suas credenciais.",
+        "bottom",
       );
-
       Alert.alert(
-        'Erro ao entrar',
-        err.message ?? 'Verifique suas credenciais.'
+        "Erro ao entrar",
+        err.message ?? "Verifique suas credenciais.",
       );
     } finally {
       setLoading(false);
@@ -47,7 +48,7 @@ export default function LoginScreen({ navigation }: any) {
   return (
     <KeyboardAvoidingView
       style={s.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <View style={s.header}>
         <Text style={s.logo}>🥦</Text>
@@ -72,26 +73,9 @@ export default function LoginScreen({ navigation }: any) {
 
         <Text style={s.label}>Senha</Text>
 
-        <View style={s.passwordContainer}>
-          <TextInput
-            style={s.passwordInput}
-            placeholder="••••••••"
-            placeholderTextColor="#555"
-            secureTextEntry={!showPassword}
-            value={password}
-            onChangeText={setPassword}
-          />
-
-          <TouchableOpacity
-            onPress={() => setShowPassword(!showPassword)}
-          >
-            <Ionicons
-              name={showPassword ? 'eye-off' : 'eye'}
-              size={22}
-              color="#888"
-            />
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity onPress={() => navigation.navigate("ForgotPassword")}>
+          <Text style={s.forgotLink}>Esqueci minha senha</Text>
+        </TouchableOpacity>
 
         <TouchableOpacity
           style={s.btn}
@@ -105,12 +89,9 @@ export default function LoginScreen({ navigation }: any) {
           )}
         </TouchableOpacity>
 
-        <TouchableOpacity
-          onPress={() => navigation.navigate('Register')}
-        >
+        <TouchableOpacity onPress={() => navigation.navigate("Register")}>
           <Text style={s.link}>
-            Não tem conta?{' '}
-            <Text style={s.linkAccent}>Cadastre-se</Text>
+            Não tem conta? <Text style={s.linkAccent}>Cadastre-se</Text>
           </Text>
         </TouchableOpacity>
       </View>
@@ -121,62 +102,24 @@ export default function LoginScreen({ navigation }: any) {
 const s = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0F0F0F',
-    justifyContent: 'center',
+    backgroundColor: "#0F0F0F",
+    justifyContent: "center",
     padding: 24,
   },
-
-  header: {
-    alignItems: 'center',
-    marginBottom: 48,
-  },
-
-  logo: {
-    fontSize: 56,
-  },
-
-  brand: {
-    fontSize: 32,
-    fontWeight: '700',
-    color: '#3DDC97',
-    marginTop: 8,
-  },
-
-  subtitle: {
-    fontSize: 14,
-    color: '#888',
-    marginTop: 4,
-    textAlign: 'center',
-  },
-
-  form: {
-    gap: 12,
-  },
-
-  label: {
-    color: '#CCC',
-    fontSize: 13,
-    marginBottom: -6,
-  },
-
+  header: { alignItems: "center", marginBottom: 48 },
+  logo: { fontSize: 56 },
+  brand: { fontSize: 32, fontWeight: "700", color: "#3DDC97", marginTop: 8 },
+  subtitle: { fontSize: 14, color: "#888", marginTop: 4, textAlign: "center" },
+  form: { gap: 12 },
+  label: { color: "#CCC", fontSize: 13, marginBottom: -6 },
   input: {
-    backgroundColor: '#1E1E1E',
-    color: '#FFF',
+    backgroundColor: "#1E1E1E",
+    color: "#FFF",
     borderRadius: 10,
     padding: 14,
     fontSize: 15,
     borderWidth: 1,
-    borderColor: '#2E2E2E',
-  },
-
-  passwordContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#1E1E1E',
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#2E2E2E',
-    paddingHorizontal: 14,
+    borderColor: "#2E2E2E",
   },
 
   passwordInput: {
@@ -187,28 +130,21 @@ const s = StyleSheet.create({
   },
 
   btn: {
-    backgroundColor: '#3DDC97',
+    backgroundColor: "#3DDC97",
     borderRadius: 10,
     padding: 16,
-    alignItems: 'center',
+    alignItems: "center",
     marginTop: 8,
   },
+  btnText: { color: "#0F0F0F", fontWeight: "700", fontSize: 16 },
+  link: { color: "#888", textAlign: "center", marginTop: 16, fontSize: 14 },
+  linkAccent: { color: "#3DDC97", fontWeight: "600" },
 
-  btnText: {
-    color: '#0F0F0F',
-    fontWeight: '700',
-    fontSize: 16,
-  },
-
-  link: {
-    color: '#888',
-    textAlign: 'center',
-    marginTop: 16,
-    fontSize: 14,
-  },
-
-  linkAccent: {
-    color: '#3DDC97',
-    fontWeight: '600',
+  forgotLink: {
+    color: "#3DDC97",
+    textAlign: "right",
+    fontSize: 13,
+    marginTop: -4,
+    marginBottom: 4,
   },
 });

@@ -313,9 +313,6 @@ export default function NotificationDetailScreen({ route, navigation }: any) {
             )}
             <View style={{ flex: 1 }}>
               <Text style={s.requesterName}>{contactPerson?.name ?? "—"}</Text>
-              {contactPerson?.phone && (
-                <Text style={s.requesterMeta}>📞 {contactPerson.phone}</Text>
-              )}
               {contactPerson?.address && (
                 <Text style={s.requesterMeta}>📍 {contactPerson.address}</Text>
               )}
