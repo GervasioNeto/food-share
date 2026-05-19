@@ -6,6 +6,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import MapView, { Marker, PROVIDER_DEFAULT, Region } from 'react-native-maps';
 import * as Location from 'expo-location';
+import { useFocusEffect } from '@react-navigation/native';
 import { supabase } from '../lib/supabase';
 
 type DonationMarker = {
@@ -35,8 +36,13 @@ export default function MapScreen({ navigation }: any) {
 
   useEffect(() => {
     requestLocationAndCenter();
-    fetchDonations();
   }, []);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchDonations();
+    }, [])
+  );
 
   async function requestLocationAndCenter() {
     try {

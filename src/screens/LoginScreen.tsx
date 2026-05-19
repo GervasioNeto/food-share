@@ -25,7 +25,9 @@ export default function LoginScreen({ navigation }: any) {
       showToast.error("Atenção", "Preencha e-mail e senha.", "bottom");
       return;
     }
+
     setLoading(true);
+
     try {
       await signIn(email.trim(), password);
     } catch (err: any) {
@@ -51,11 +53,14 @@ export default function LoginScreen({ navigation }: any) {
       <View style={s.header}>
         <Text style={s.logo}>🥦</Text>
         <Text style={s.brand}>FoodShare</Text>
-        <Text style={s.subtitle}>Conectando quem tem com quem precisa</Text>
+        <Text style={s.subtitle}>
+          Conectando quem tem com quem precisa
+        </Text>
       </View>
 
       <View style={s.form}>
         <Text style={s.label}>E-mail</Text>
+
         <TextInput
           style={s.input}
           placeholder="seu@email.com"
@@ -67,14 +72,6 @@ export default function LoginScreen({ navigation }: any) {
         />
 
         <Text style={s.label}>Senha</Text>
-        <TextInput
-          style={s.input}
-          placeholder="••••••••"
-          placeholderTextColor="#555"
-          secureTextEntry
-          value={password}
-          onChangeText={setPassword}
-        />
 
         <TouchableOpacity onPress={() => navigation.navigate("ForgotPassword")}>
           <Text style={s.forgotLink}>Esqueci minha senha</Text>
@@ -124,6 +121,14 @@ const s = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#2E2E2E",
   },
+
+  passwordInput: {
+    flex: 1,
+    color: '#FFF',
+    paddingVertical: 14,
+    fontSize: 15,
+  },
+
   btn: {
     backgroundColor: "#3DDC97",
     borderRadius: 10,
