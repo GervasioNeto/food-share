@@ -6,10 +6,11 @@ import {
   TouchableOpacity,
   StyleSheet,
   KeyboardAvoidingView,
-  Platform,
+  ScrollView,
   ActivityIndicator,
   Alert,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../contexts/AuthContext";
 import { showToast } from "../components/Toast";
 
@@ -17,6 +18,7 @@ export default function LoginScreen({ navigation }: any) {
   const { signIn } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
   async function handleLogin() {
@@ -31,15 +33,8 @@ export default function LoginScreen({ navigation }: any) {
     try {
       await signIn(email.trim(), password);
     } catch (err: any) {
-      showToast.error(
-        "Erro ao entrar",
-        err.message ?? "Verifique suas credenciais.",
-        "bottom",
-      );
-      Alert.alert(
-        "Erro ao entrar",
-        err.message ?? "Verifique suas credenciais.",
-      );
+      showToast.error("Erro ao entrar", err.message ?? "Verifique suas credenciais.", "bottom");
+      Alert.alert("Erro ao entrar", err.message ?? "Verifique suas credenciais.");
     } finally {
       setLoading(false);
     }
@@ -47,71 +42,73 @@ export default function LoginScreen({ navigation }: any) {
 
   return (
     <KeyboardAvoidingView
-      style={s.container}
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      style={{ flex: 1, backgroundColor: "#0F0F0F" }}
+      behavior="padding"
     >
-      <View style={s.header}>
-        <Text style={s.logo}>🥦</Text>
-        <Text style={s.brand}>FoodShare</Text>
-        <Text style={s.subtitle}>
-          Conectando quem tem com quem precisa
-        </Text>
-      </View>
+      <ScrollView
+        style={{ backgroundColor: "#0F0F0F" }}
+        contentContainerStyle={s.container}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View style={s.header}>
+          <Text style={s.logo}>🥦</Text>
+          <Text style={s.brand}>FoodShare</Text>
+          <Text style={s.subtitle}>Conectando quem tem com quem precisa</Text>
+        </View>
 
-      <View style={s.form}>
-        <Text style={s.label}>E-mail</Text>
+        <View style={s.form}>
+          <Text style={s.label}>E-mail</Text>
+          <TextInput
+            style={s.input}
+            placeholder="seu@email.com"
+            placeholderTextColor="#555"
+            keyboardType="email-address"
+            autoCapitalize="none"
+            value={email}
+            onChangeText={setEmail}
+          />
 
-        <TextInput
-          style={s.input}
-          placeholder="seu@email.com"
-          placeholderTextColor="#555"
-          keyboardType="email-address"
-          autoCapitalize="none"
-          value={email}
-          onChangeText={setEmail}
-        />
+          <Text style={s.label}>Senha</Text>
+          <View style={s.passwordContainer}>
+            <TextInput
+              style={s.passwordInput}
+              placeholder="••••••••"
+              placeholderTextColor="#555"
+              secureTextEntry={!showPassword}
+              value={password}
+              onChangeText={setPassword}
+            />
+            <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+              <Ionicons name={showPassword ? "eye-off" : "eye"} size={22} color="#888" />
+            </TouchableOpacity>
+          </View>
 
-        <Text style={s.label}>Senha</Text>
+          <TouchableOpacity onPress={() => navigation.navigate("ForgotPassword")}>
+            <Text style={s.forgotLink}>Esqueci minha senha</Text>
+          </TouchableOpacity>
 
-        <TextInput
-          style={s.input}
-          placeholder="••••••••"
-          placeholderTextColor="#555"
-          secureTextEntry
-          value={password}
-          onChangeText={setPassword}
-        />
+          <TouchableOpacity style={s.btn} onPress={handleLogin} disabled={loading}>
+            {loading ? (
+              <ActivityIndicator color="#0F0F0F" />
+            ) : (
+              <Text style={s.btnText}>Entrar</Text>
+            )}
+          </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => navigation.navigate("ForgotPassword")}>
-          <Text style={s.forgotLink}>Esqueci minha senha</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={s.btn}
-          onPress={handleLogin}
-          disabled={loading}
-        >
-          {loading ? (
-            <ActivityIndicator color="#0F0F0F" />
-          ) : (
-            <Text style={s.btnText}>Entrar</Text>
-          )}
-        </TouchableOpacity>
-
-        <TouchableOpacity onPress={() => navigation.navigate("Register")}>
-          <Text style={s.link}>
-            Não tem conta? <Text style={s.linkAccent}>Cadastre-se</Text>
-          </Text>
-        </TouchableOpacity>
-      </View>
+          <TouchableOpacity onPress={() => navigation.navigate("Register")}>
+            <Text style={s.link}>
+              Não tem conta? <Text style={s.linkAccent}>Cadastre-se</Text>
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 }
 
 const s = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: "#0F0F0F",
+    flexGrow: 1,
     justifyContent: "center",
     padding: 24,
   },
@@ -130,14 +127,21 @@ const s = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#2E2E2E",
   },
-
+  passwordContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#1E1E1E",
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#2E2E2E",
+    paddingHorizontal: 14,
+  },
   passwordInput: {
     flex: 1,
-    color: '#FFF',
+    color: "#FFF",
     paddingVertical: 14,
     fontSize: 15,
   },
-
   btn: {
     backgroundColor: "#3DDC97",
     borderRadius: 10,
@@ -148,7 +152,6 @@ const s = StyleSheet.create({
   btnText: { color: "#0F0F0F", fontWeight: "700", fontSize: 16 },
   link: { color: "#888", textAlign: "center", marginTop: 16, fontSize: 14 },
   linkAccent: { color: "#3DDC97", fontWeight: "600" },
-
   forgotLink: {
     color: "#3DDC97",
     textAlign: "right",
