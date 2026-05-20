@@ -108,12 +108,6 @@ export default function HomeScreen({ navigation }: any) {
           >
             <Text style={s.actionChipText}>📦 Minhas doações</Text>
           </TouchableOpacity>
-          <TouchableOpacity
-            style={s.actionChip}
-            onPress={() => navigation.navigate("Requests")}
-          >
-            <Text style={s.actionChipText}>📬 Solicitações</Text>
-          </TouchableOpacity>
         </View>
       )}
 

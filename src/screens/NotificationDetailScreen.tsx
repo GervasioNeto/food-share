@@ -52,7 +52,7 @@ const STATUS_CONFIG: Record<
   rejected: { label: "Recusada", color: "#FF4D4D", bg: "#FF4D4D22" },
 };
 
-// Tipos de notificação vistos pelo RECEPTOR (mostram info do doador)
+
 const RECEIVER_VIEW_TYPES = new Set(["accepted", "rejected"]);
 
 export default function NotificationDetailScreen({ route, navigation }: any) {
@@ -159,8 +159,15 @@ export default function NotificationDetailScreen({ route, navigation }: any) {
       if (action === "accepted") {
         await supabase
           .from("donations")
-          .update({ status: "completed" })
+          .update({ status: "reserved" })
           .eq("id", request.donation_id);
+
+        await supabase.from("chat_rooms").insert({
+          request_id: request.id,
+          donor_id: user.id,
+          requester_id: request.requester_id,
+          donation_id: request.donation_id,
+        });
       }
 
       await supabase.from("notifications").insert({
@@ -171,7 +178,7 @@ export default function NotificationDetailScreen({ route, navigation }: any) {
             : "Solicitação recusada",
         body:
           action === "accepted"
-            ? `Sua solicitação de "${request.donation.food_name}" foi aceita. Entre em contato com o doador.`
+            ? `Sua solicitação de "${request.donation.food_name}" foi aceita. Acesse a aba Chats para combinar a entrega.`
             : `Sua solicitação de "${request.donation.food_name}" não foi aceita desta vez.`,
         type: action,
         read: false,
@@ -265,7 +272,6 @@ export default function NotificationDetailScreen({ route, navigation }: any) {
   const isPending = request.status === "pending";
   const isReceiverView = RECEIVER_VIEW_TYPES.has(notifType);
 
-  // Quem aparece no card de contato depende da perspectiva
   const contactPerson = isReceiverView
     ? request.donation.donor
     : request.requester;
@@ -288,7 +294,6 @@ export default function NotificationDetailScreen({ route, navigation }: any) {
         </View>
         <Text style={s.pageDate}>{formatDate(request.created_at)}</Text>
 
-        {/* Card: Contato (doador ou solicitante conforme perspectiva) */}
         <View style={s.card}>
           <Text style={s.cardLabel}>{contactLabel}</Text>
           <View style={s.requesterRow}>
@@ -306,9 +311,6 @@ export default function NotificationDetailScreen({ route, navigation }: any) {
             )}
             <View style={{ flex: 1 }}>
               <Text style={s.requesterName}>{contactPerson?.name ?? "—"}</Text>
-              {contactPerson?.phone && (
-                <Text style={s.requesterMeta}>📞 {contactPerson.phone}</Text>
-              )}
               {contactPerson?.address && (
                 <Text style={s.requesterMeta}>📍 {contactPerson.address}</Text>
               )}
@@ -316,7 +318,6 @@ export default function NotificationDetailScreen({ route, navigation }: any) {
           </View>
         </View>
 
-        {/* Card: Doação */}
         <View style={s.card}>
           <Text style={s.cardLabel}>DOAÇÃO SOLICITADA</Text>
           {request.donation.image_url ? (
@@ -343,7 +344,6 @@ export default function NotificationDetailScreen({ route, navigation }: any) {
           </View>
         </View>
 
-        {/* Ações — só para o DOADOR em solicitações pendentes */}
         {!isReceiverView && isPending && (
           <View style={s.actionsRow}>
             <TouchableOpacity
@@ -371,7 +371,6 @@ export default function NotificationDetailScreen({ route, navigation }: any) {
           </View>
         )}
 
-        {/* Banner processado — doador após decidir */}
         {!isReceiverView && !isPending && (
           <View style={[s.processedBanner, { borderColor: statusConf.color }]}>
             <Text style={[s.processedText, { color: statusConf.color }]}>
@@ -382,7 +381,6 @@ export default function NotificationDetailScreen({ route, navigation }: any) {
           </View>
         )}
 
-        {/* Banner para o RECEPTOR — aceita */}
         {isReceiverView && request.status === "accepted" && (
           <View style={[s.processedBanner, { borderColor: "#3DDC97" }]}>
             <Text style={[s.processedText, { color: "#3DDC97" }]}>
@@ -392,7 +390,6 @@ export default function NotificationDetailScreen({ route, navigation }: any) {
           </View>
         )}
 
-        {/* Banner para o RECEPTOR — recusada */}
         {isReceiverView && request.status === "rejected" && (
           <View style={[s.processedBanner, { borderColor: "#FF4D4D" }]}>
             <Text style={[s.processedText, { color: "#FF4D4D" }]}>

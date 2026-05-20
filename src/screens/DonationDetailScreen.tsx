@@ -81,7 +81,6 @@ export default function DonationDetailScreen({ route, navigation }: any) {
     if (!user || !donation) return;
     setRequesting(true);
     try {
-      // 1. Cria o request e captura o ID retornado
       const { data: newRequest, error } = await supabase
         .from("requests")
         .insert({
@@ -89,12 +88,10 @@ export default function DonationDetailScreen({ route, navigation }: any) {
           requester_id: user.id,
           status: "pending",
         })
-        .select("id") // captura o ID
+        .select("id")
         .single();
 
       if (error) throw error;
-
-      // 2. Cria a notificação com request_id vinculado
       await supabase.from("notifications").insert({
         user_id: donation.donor_id,
         title: "Nova solicitação recebida",

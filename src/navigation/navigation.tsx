@@ -1,38 +1,19 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { NavigationContainer } from "@react-navigation/native";
+import * as Linking from "expo-linking";
 import { Toast } from "../components/Toast";
 import { toastConfig } from "../components/Toast/toastConfig";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { Text, View } from "react-native";
+import { Text } from "react-native";
 import { useAuth } from "../contexts/AuthContext";
+import { supabase } from "../lib/supabase";
 
 import LoginScreen from "../screens/LoginScreen";
 import RegisterScreen from "../screens/RegisterScreen";
 import HomeScreen from "../screens/HomeScreen";
 import EditProfileScreen from "../screens/EditProfileScreen";
-// import MapScreen from '../screens/MapScreen'; // TODO: habilitar após resolver compatibilidade web
-
-function MapPlaceholder() {
-  return (
-    <View
-      style={{
-        flex: 1,
-        backgroundColor: "#0F0F0F",
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-    >
-      <Text style={{ fontSize: 48, marginBottom: 12 }}>🗺️</Text>
-      <Text style={{ color: "#3DDC97", fontSize: 18, fontWeight: "700" }}>
-        Mapa em breve
-      </Text>
-      <Text style={{ color: "#666", fontSize: 13, marginTop: 6 }}>
-        Funcionalidade em desenvolvimento
-      </Text>
-    </View>
-  );
-}
+import MapScreen from "../screens/MapScreen";
 import NotificationsScreen from "../screens/NotificationsScreen";
 import ProfileScreen from "../screens/ProfileScreen";
 import DonationDetailScreen from "../screens/DonationDetailScreen";
@@ -40,6 +21,10 @@ import NewDonationScreen from "../screens/NewDonationScreen";
 import MyDonationsScreen from "../screens/MyDonationsScreen";
 import RequestsScreen from "../screens/RequestsScreen";
 import NotificationDetailScreen from "../screens/NotificationDetailScreen";
+import ChatListScreen from "../screens/ChatListScreen";
+import ChatScreen from "../screens/ChatScreen";
+import ResetPasswordScreen from "../screens/ResetPasswordScreen";
+import ForgotPasswordScreen from "../screens/ForgotPasswordScreen";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -52,9 +37,11 @@ function TabIcon({ name, focused }: { name: string; focused: boolean }) {
   const icons: Record<string, string> = {
     Início: "🏠",
     Mapa: "🗺️",
+    Chats: "💬",
     Alertas: "🔔",
     Perfil: "👤",
   };
+
   return (
     <Text style={{ fontSize: 20, opacity: focused ? 1 : 0.5 }}>
       {icons[name]}
@@ -76,7 +63,8 @@ function MainTabs() {
       })}
     >
       <Tab.Screen name="Início" component={HomeScreen} />
-      <Tab.Screen name="Mapa" component={MapPlaceholder} />
+      <Tab.Screen name="Mapa" component={MapScreen} />
+      <Tab.Screen name="Chats" component={ChatListScreen} />
       <Tab.Screen name="Alertas" component={NotificationsScreen} />
       <Tab.Screen name="Perfil" component={ProfileScreen} />
     </Tab.Navigator>
@@ -96,6 +84,7 @@ function AppStack() {
       />
       <Stack.Screen name="Requests" component={RequestsScreen} />
       <Stack.Screen name="EditProfile" component={EditProfileScreen} />
+      <Stack.Screen name="Chat" component={ChatScreen} />
     </Stack.Navigator>
   );
 }
@@ -105,19 +94,82 @@ function AuthStack() {
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="Register" component={RegisterScreen} />
+      <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+      <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} />
     </Stack.Navigator>
   );
 }
 
 export default function Navigation() {
   const { session, loading } = useAuth();
+  const [isRecovery, setIsRecovery] = useState(false);
+  const [bootChecked, setBootChecked] = useState(false);
 
-  if (loading) return null;
+  useEffect(() => {
+    let mounted = true;
+
+    async function checkInitialState() {
+      try {
+        const url = await Linking.getInitialURL();
+
+        if (url?.includes("reset-password")) {
+          if (mounted) setIsRecovery(true);
+        }
+
+        const { data } = await supabase.auth.getSession();
+
+        if (data.session && url?.includes("reset-password")) {
+          if (mounted) setIsRecovery(true);
+        }
+      } finally {
+        if (mounted) setBootChecked(true);
+      }
+    }
+
+    checkInitialState();
+
+    const linkSub = Linking.addEventListener("url", ({ url }) => {
+      if (url?.includes("reset-password")) {
+        setIsRecovery(true);
+      }
+    });
+
+    const {
+      data: { subscription: authSub },
+    } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "PASSWORD_RECOVERY") {
+        setIsRecovery(true);
+      }
+
+      if (event === "USER_UPDATED" || event === "SIGNED_OUT") {
+        setIsRecovery(false);
+      }
+    });
+
+    return () => {
+      mounted = false;
+      linkSub.remove();
+      authSub.unsubscribe();
+    };
+  }, []);
+
+  if (loading || !bootChecked) return null;
 
   return (
     <>
       <NavigationContainer>
-        {session ? <AppStack /> : <AuthStack />}
+        <Stack.Navigator screenOptions={{ headerShown: false }}>
+          {isRecovery ? (
+            <Stack.Screen
+              name="ResetPassword"
+              component={ResetPasswordScreen}
+            />
+          ) : session ? (
+            <Stack.Screen name="App" component={AppStack} />
+          ) : (
+            <Stack.Screen name="Auth" component={AuthStack} />
+          )}
+        </Stack.Navigator>
       </NavigationContainer>
       <Toast config={toastConfig} />
     </>

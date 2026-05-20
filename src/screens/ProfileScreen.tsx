@@ -17,42 +17,57 @@ type Stats = {
   total: number;
   completed: number;
   kg_donated: number;
+  kg_received: number;
 };
 
 export default function ProfileScreen({ navigation }: any) {
   const { profile, signOut, user } = useAuth();
+
   const [stats, setStats] = useState<Stats>({
     total: 0,
     completed: 0,
     kg_donated: 0,
+    kg_received: 0,
   });
 
-  // 🔹 função extraída (mesma lógica original)
   const loadStats = async () => {
     if (!user) return;
-
-    const { data } = await supabase
+    const { data: donations } = await supabase
       .from("donations")
       .select("status, quantity")
-      .eq("donor_id", user!.id);
+      .eq("donor_id", user.id);
+    const { data: received } = await supabase
+      .from("donations")
+      .select("status, quantity")
+      .eq("receiver_id", user.id);
 
-    if (data) {
-      const total = data.length;
-      const completed = data.filter((d) => d.status === "completed").length;
-      const kg_donated = data
-        .filter((d) => d.status === "completed")
-        .reduce((acc, d) => acc + (Number(d.quantity) || 0), 0);
+    const total = donations?.length ?? 0;
 
-      setStats({ total, completed, kg_donated });
-    }
+    const completed =
+      donations?.filter((d) => d.status === "completed").length ?? 0;
+
+    const kg_donated =
+      donations
+        ?.filter((d) => d.status === "completed")
+        .reduce((acc, d) => acc + (Number(d.quantity) || 0), 0) ?? 0;
+
+    const kg_received =
+      received
+        ?.filter((d) => d.status === "completed")
+        .reduce((acc, d) => acc + (Number(d.quantity) || 0), 0) ?? 0;
+
+    setStats({
+      total,
+      completed,
+      kg_donated,
+      kg_received,
+    });
   };
 
-  // 🔹 mantém comportamento original
   useEffect(() => {
     loadStats();
   }, [user]);
 
-  // 🔹 NOVO: atualiza ao voltar pra tela
   useFocusEffect(
     useCallback(() => {
       loadStats();
@@ -91,18 +106,25 @@ export default function ProfileScreen({ navigation }: any) {
           <View style={s.avatar}>
             <Text style={s.avatarText}>{initials}</Text>
           </View>
+
           <Text style={s.name}>{profile?.name ?? "—"}</Text>
+
           <View style={[s.roleBadge, { backgroundColor: roleColor + "22" }]}>
-            <Text style={[s.roleText, { color: roleColor }]}>{roleLabel}</Text>
+            <Text style={[s.roleText, { color: roleColor }]}>
+              {roleLabel}
+            </Text>
           </View>
+
           {profile?.address && (
             <Text style={s.address}>📍 {profile.address}</Text>
           )}
         </View>
 
+      
         {profile?.role === "donor" && (
           <View style={s.impactCard}>
             <Text style={s.impactTitle}>🌱 Seu impacto</Text>
+
             <View style={s.statsRow}>
               <StatBox value={stats.total} label="Doações" />
               <View style={s.divider} />
@@ -110,6 +132,7 @@ export default function ProfileScreen({ navigation }: any) {
               <View style={s.divider} />
               <StatBox value={`${stats.kg_donated}kg`} label="Doados" />
             </View>
+
             <View style={s.progressBar}>
               <View
                 style={[
@@ -123,10 +146,42 @@ export default function ProfileScreen({ navigation }: any) {
                 ]}
               />
             </View>
+
             <Text style={s.progressLabel}>
               {stats.total > 0
-                ? `${Math.round((stats.completed / stats.total) * 100)}% das suas doações foram concluídas`
+                ? `${Math.round(
+                    (stats.completed / stats.total) * 100
+                  )}% das suas doações foram concluídas`
                 : "Faça sua primeira doação!"}
+            </Text>
+          </View>
+        )}
+
+        
+        {profile?.role === "receiver" && (
+          <View style={s.impactCard}>
+            <Text style={s.impactTitle}>💙 Seu impacto</Text>
+
+            <View style={s.statsRow}>
+              <StatBox value={`${stats.kg_received}kg`} label="Recebidos" />
+            </View>
+
+            <View style={s.progressBar}>
+              <View
+                style={[
+                  s.progressFill,
+                  {
+                    width: `${Math.min(stats.kg_received * 5, 100)}%`,
+                    backgroundColor: "#60A5FA",
+                  },
+                ]}
+              />
+            </View>
+
+            <Text style={s.progressLabel}>
+              {stats.kg_received > 0
+                ? `Você já recebeu ${stats.kg_received}kg em doações`
+                : "Você ainda não recebeu doações"}
             </Text>
           </View>
         )}
@@ -155,7 +210,13 @@ export default function ProfileScreen({ navigation }: any) {
   );
 }
 
-function StatBox({ value, label }: { value: string | number; label: string }) {
+function StatBox({
+  value,
+  label,
+}: {
+  value: string | number;
+  label: string;
+}) {
   return (
     <View style={{ alignItems: "center", flex: 1 }}>
       <Text style={s.statValue}>{value}</Text>
@@ -187,13 +248,16 @@ function InfoRow({
 const s = StyleSheet.create({
   safe: { flex: 1, backgroundColor: "#0F0F0F" },
   container: { padding: 20, paddingBottom: 48 },
+
   pageTitle: {
     fontSize: 22,
     fontWeight: "700",
     color: "#FFF",
     marginBottom: 24,
   },
+
   avatarSection: { alignItems: "center", marginBottom: 24 },
+
   avatar: {
     width: 90,
     height: 90,
@@ -205,16 +269,38 @@ const s = StyleSheet.create({
     alignItems: "center",
     marginBottom: 12,
   },
-  avatarText: { fontSize: 32, fontWeight: "700", color: "#3DDC97" },
-  name: { fontSize: 22, fontWeight: "700", color: "#FFF", marginBottom: 8 },
+
+  avatarText: {
+    fontSize: 32,
+    fontWeight: "700",
+    color: "#3DDC97",
+  },
+
+  name: {
+    fontSize: 22,
+    fontWeight: "700",
+    color: "#FFF",
+    marginBottom: 8,
+  },
+
   roleBadge: {
     paddingHorizontal: 14,
     paddingVertical: 5,
     borderRadius: 12,
     marginBottom: 8,
   },
-  roleText: { fontSize: 13, fontWeight: "600" },
-  address: { fontSize: 13, color: "#666", marginTop: 4 },
+
+  roleText: {
+    fontSize: 13,
+    fontWeight: "600",
+  },
+
+  address: {
+    fontSize: 13,
+    color: "#666",
+    marginTop: 4,
+  },
+
   impactCard: {
     backgroundColor: "#1E1E1E",
     borderRadius: 16,
@@ -223,16 +309,38 @@ const s = StyleSheet.create({
     borderColor: "#2E2E2E",
     marginBottom: 16,
   },
+
   impactTitle: {
     fontSize: 16,
     fontWeight: "700",
     color: "#FFF",
     marginBottom: 16,
   },
-  statsRow: { flexDirection: "row", alignItems: "center", marginBottom: 16 },
-  divider: { width: 1, height: 32, backgroundColor: "#2E2E2E" },
-  statValue: { fontSize: 24, fontWeight: "800", color: "#3DDC97" },
-  statLabel: { fontSize: 12, color: "#888", marginTop: 2 },
+
+  statsRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+
+  divider: {
+    width: 1,
+    height: 32,
+    backgroundColor: "#2E2E2E",
+  },
+
+  statValue: {
+    fontSize: 24,
+    fontWeight: "800",
+    color: "#3DDC97",
+  },
+
+  statLabel: {
+    fontSize: 12,
+    color: "#888",
+    marginTop: 2,
+  },
+
   progressBar: {
     height: 6,
     backgroundColor: "#2E2E2E",
@@ -240,8 +348,19 @@ const s = StyleSheet.create({
     overflow: "hidden",
     marginBottom: 8,
   },
-  progressFill: { height: "100%", backgroundColor: "#3DDC97", borderRadius: 3 },
-  progressLabel: { fontSize: 12, color: "#666", textAlign: "center" },
+
+  progressFill: {
+    height: "100%",
+    backgroundColor: "#3DDC97",
+    borderRadius: 3,
+  },
+
+  progressLabel: {
+    fontSize: 12,
+    color: "#666",
+    textAlign: "center",
+  },
+
   infoCard: {
     backgroundColor: "#1E1E1E",
     borderRadius: 16,
@@ -251,10 +370,26 @@ const s = StyleSheet.create({
     marginBottom: 24,
     gap: 12,
   },
-  infoRow: { flexDirection: "row", alignItems: "center", gap: 12 },
+
+  infoRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+
   infoIcon: { fontSize: 20 },
-  infoLabel: { fontSize: 12, color: "#888" },
-  infoValue: { fontSize: 14, color: "#FFF", fontWeight: "500" },
+
+  infoLabel: {
+    fontSize: 12,
+    color: "#888",
+  },
+
+  infoValue: {
+    fontSize: 14,
+    color: "#FFF",
+    fontWeight: "500",
+  },
+
   editProfileBtn: {
     backgroundColor: "#1E1E1E",
     borderWidth: 1,
@@ -263,7 +398,13 @@ const s = StyleSheet.create({
     padding: 16,
     alignItems: "center",
   },
-  editProfileText: { color: "#3DDC97", fontWeight: "600", fontSize: 15 },
+
+  editProfileText: {
+    color: "#3DDC97",
+    fontWeight: "600",
+    fontSize: 15,
+  },
+
   signOutBtn: {
     borderWidth: 1,
     borderColor: "#FF4D4D",
@@ -271,5 +412,10 @@ const s = StyleSheet.create({
     padding: 16,
     alignItems: "center",
   },
-  signOutText: { color: "#FF4D4D", fontWeight: "600", fontSize: 15 },
+
+  signOutText: {
+    color: "#FF4D4D",
+    fontWeight: "600",
+    fontSize: 15,
+  },
 });
