@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import {
+  Alert,
   View,
   Text,
   FlatList,
@@ -89,22 +90,45 @@ export default function ChatScreen() {
     listRef.current?.scrollToEnd({ animated: true });
   }
 
-  async function sendMessage() {
-    const trimmed = text.trim();
-    if (!trimmed || !profile || sending) return;
+async function sendMessage() {
+  const trimmed = text.trim();
+
+  if (!trimmed || !profile || sending) {
+    return;
+  }
+
+  setSending(true);
+
+  try {
+    const { error } = await supabase
+      .from("messages")
+      .insert({
+        room_id: roomId,
+        sender_id: profile.id,
+        content: trimmed,
+      });
+
+    if (error) {
+      throw error;
+    }
 
     setText("");
-    setSending(true);
 
-    await supabase.from("messages").insert({
-      room_id: roomId,
-      sender_id: profile.id,
-      content: trimmed,
-    });
-
-    setSending(false);
     scrollToBottom();
+  } catch (err: any) {
+    console.error(
+      "sendMessage error:",
+      err
+    );
+    Alert.alert(
+      "Erro ao enviar mensagem",
+      err?.message ??
+        "Verifique sua conexão e tente novamente."
+    );
+  } finally {
+    setSending(false);
   }
+}
 
   function formatTime(dateStr: string): string {
     return new Date(dateStr).toLocaleTimeString("pt-BR", {
