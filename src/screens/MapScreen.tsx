@@ -59,7 +59,6 @@ export default function MapScreen({ navigation }: any) {
         longitudeDelta: 0.05,
       });
     } catch {
-      // fallback para Fortaleza
     } finally {
       setLoadingMap(false);
     }
@@ -133,12 +132,10 @@ export default function MapScreen({ navigation }: any) {
             ))}
           </MapView>
 
-          {/* botão centralizar */}
           <TouchableOpacity style={s.myLocationBtn} onPress={centerOnUser}>
             <Text style={s.myLocationIcon}>📍</Text>
           </TouchableOpacity>
 
-          {/* card da doação selecionada */}
           {selected && (
             <View style={s.card}>
               <View style={s.cardHandle} />

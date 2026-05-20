@@ -50,7 +50,7 @@ export default function ChatListScreen() {
       return;
     }
 
-    // busca última mensagem de cada sala
+    
     const roomsWithLastMessage = await Promise.all(
       data.map(async (room: any) => {
         const { data: msgs } = await supabase
@@ -77,7 +77,7 @@ export default function ChatListScreen() {
     }, [fetchRooms])
   );
 
-  // subscription em tempo real: qualquer mensagem nova recarrega a lista
+  
   useEffect(() => {
     if (!profile) return;
 

@@ -32,14 +32,10 @@ export default function ProfileScreen({ navigation }: any) {
 
   const loadStats = async () => {
     if (!user) return;
-
-    // doações feitas (doador)
     const { data: donations } = await supabase
       .from("donations")
       .select("status, quantity")
       .eq("donor_id", user.id);
-
-    // doações recebidas (receptor)
     const { data: received } = await supabase
       .from("donations")
       .select("status, quantity")

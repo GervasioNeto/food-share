@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import {
+  Alert,
   View,
   Text,
   FlatList,
@@ -40,12 +41,10 @@ export default function ChatScreen() {
   const [sending, setSending] = useState(false);
   const listRef = useRef<FlatList>(null);
 
-  // carrega mensagens iniciais
   useEffect(() => {
     fetchMessages();
   }, [roomId]);
 
-  // inscrição em tempo real para novas mensagens
   useEffect(() => {
     const channel = supabase
       .channel(`room_${roomId}`)
@@ -60,7 +59,6 @@ export default function ChatScreen() {
         (payload) => {
           const newMsg = payload.new as Message;
           setMessages((prev) => {
-            // evita duplicar mensagem que já adicionamos otimisticamente
             const exists = prev.some((m) => m.id === newMsg.id);
             if (exists) return prev;
             return [...prev, newMsg];
@@ -92,22 +90,45 @@ export default function ChatScreen() {
     listRef.current?.scrollToEnd({ animated: true });
   }
 
-  async function sendMessage() {
-    const trimmed = text.trim();
-    if (!trimmed || !profile || sending) return;
+async function sendMessage() {
+  const trimmed = text.trim();
+
+  if (!trimmed || !profile || sending) {
+    return;
+  }
+
+  setSending(true);
+
+  try {
+    const { error } = await supabase
+      .from("messages")
+      .insert({
+        room_id: roomId,
+        sender_id: profile.id,
+        content: trimmed,
+      });
+
+    if (error) {
+      throw error;
+    }
 
     setText("");
-    setSending(true);
 
-    await supabase.from("messages").insert({
-      room_id: roomId,
-      sender_id: profile.id,
-      content: trimmed,
-    });
-
-    setSending(false);
     scrollToBottom();
+  } catch (err: any) {
+    console.error(
+      "sendMessage error:",
+      err
+    );
+    Alert.alert(
+      "Erro ao enviar mensagem",
+      err?.message ??
+        "Verifique sua conexão e tente novamente."
+    );
+  } finally {
+    setSending(false);
   }
+}
 
   function formatTime(dateStr: string): string {
     return new Date(dateStr).toLocaleTimeString("pt-BR", {
@@ -134,7 +155,7 @@ export default function ChatScreen() {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
     >
-      {/* cabeçalho */}
+     
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
           <Text style={styles.backText}>←</Text>
@@ -149,7 +170,6 @@ export default function ChatScreen() {
         </View>
       </View>
 
-      {/* lista de mensagens */}
       <FlatList
         ref={listRef}
         data={messages}
@@ -206,7 +226,6 @@ export default function ChatScreen() {
         }}
       />
 
-      {/* input de mensagem */}
       <View style={styles.inputRow}>
         <TextInput
           style={styles.input}
