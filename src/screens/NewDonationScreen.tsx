@@ -30,7 +30,7 @@ export default function NewDonationScreen({ navigation }: any) {
   const [quantity, setQuantity] = useState('');
   const [unit, setUnit] = useState('kg');
 
-  // DATA
+
   const [expiryDate, setExpiryDate] = useState('');
   const [expiryDisplay, setExpiryDisplay] = useState('');
   const [expiryError, setExpiryError] = useState('');
@@ -158,136 +158,149 @@ export default function NewDonationScreen({ navigation }: any) {
     };
   }
 
-  async function handleSubmit() {
-    if (
-      !foodName ||
-      !quantity ||
-      !expiryDate ||
-      !pickupAddress
-    ) {
-      Alert.alert(
-        'Atenção',
-        'Preencha todos os campos obrigatórios.'
-      );
+async function handleSubmit() {
+  if (
+    !foodName.trim() ||
+    !quantity.trim() ||
+    !expiryDate ||
+    !pickupAddress.trim()
+  ) {
+    showToast.error(
+      'Campos obrigatórios faltando',
+      'Preencha todos os campos obrigatórios.',
+      'bottom'
+    );
 
-      showToast.error(
-        'Campos obrigatórios faltando',
-        'Preencha nome, quantidade, validade e endereço.',
-        'bottom'
-      );
+    return;
+  }
 
-      return;
-    }
+  if (!user) {
+    showToast.error(
+      'Usuário não autenticado',
+      'Faça login novamente.',
+      'bottom'
+    );
 
-    if (!expiryDate) {
-      Alert.alert(
-        'Data inválida',
-        'Digite uma data de validade válida.'
-      );
-      return;
-    }
+    return;
+  }
 
-    if (!user) return;
+  const parsedQuantity = parseFloat(quantity);
 
-    const parsedQuantity = parseFloat(quantity);
+  if (
+    isNaN(parsedQuantity) ||
+    parsedQuantity <= 0
+  ) {
+    showToast.error(
+      'Quantidade inválida',
+      'Digite uma quantidade válida.',
+      'bottom'
+    );
 
-    if (isNaN(parsedQuantity)) {
-      Alert.alert(
-        'Quantidade inválida',
-        'Digite uma quantidade válida.'
-      );
-      return;
-    }
+    return;
+  }
 
-    setLoading(true);
+  setLoading(true);
 
-    try {
-      let image_url: string | undefined;
+  try {
+    let image_url: string | undefined;
 
-      if (imageUri) {
-        const ext =
-          imageUri.split('.').pop()?.toLowerCase() || 'jpg';
+    if (imageUri) {
+      const ext =
+        imageUri
+          .split('.')
+          .pop()
+          ?.toLowerCase() || 'jpg';
 
-        const fileName = `${user.id}/${Date.now()}.${ext}`;
+      const fileName = `${user.id}/${Date.now()}.${ext}`;
 
-        const response = await fetch(imageUri);
+      const response = await fetch(imageUri);
 
-        const blob = await response.blob();
-
-        const { error: uploadError } = await supabase.storage
-          .from('donation-images')
-          .upload(fileName, blob, {
-            contentType: `image/${ext}`,
-          });
-
-        if (uploadError) {
-          throw uploadError;
-        }
-
-        const { data } = supabase.storage
-          .from('donation-images')
-          .getPublicUrl(fileName);
-
-        image_url = data.publicUrl;
+      if (!response.ok) {
+        throw new Error(
+          'Erro ao processar imagem.'
+        );
       }
 
-      const coords = await geocodeAddress(
+      const blob = await response.blob();
+
+      const {
+        error: uploadError,
+      } = await supabase.storage
+        .from('donation-images')
+        .upload(fileName, blob, {
+          contentType: `image/${ext}`,
+        });
+
+      if (uploadError) {
+        throw new Error(
+          uploadError.message
+        );
+      }
+
+      const { data } = supabase.storage
+        .from('donation-images')
+        .getPublicUrl(fileName);
+
+      image_url = data.publicUrl;
+    }
+
+
+    const coords =
+      await geocodeAddress(
         pickupAddress.trim()
       );
 
-      const { error } = await supabase
-        .from('donations')
-        .insert({
-          donor_id: user.id,
-          food_name: foodName.trim(),
-          description: description.trim(),
-          quantity: parsedQuantity,
-          unit,
-          expiry_date: expiryDate,
-          pickup_address: pickupAddress.trim(),
-          status: 'available',
-          image_url,
-          lat: coords?.lat ?? null,
-          lng: coords?.lng ?? null,
-        });
 
-      if (error) {
-        throw error;
-      }
+    const {
+      error: insertError,
+    } = await supabase
+      .from('donations')
+      .insert({
+        donor_id: user.id,
+        food_name: foodName.trim(),
+        description:
+          description.trim(),
+        quantity: parsedQuantity,
+        unit,
+        expiry_date: expiryDate,
+        pickup_address:
+          pickupAddress.trim(),
+        status: 'available',
+        image_url,
+        lat: coords?.lat ?? null,
+        lng: coords?.lng ?? null,
+      });
 
-      showToast.success(
-        'Doação publicada com sucesso!',
-        'Sua doação já está visível para todos',
-        'bottom'
-      );
 
-      Alert.alert(
-        'Doação criada!',
-        'Sua doação está disponível para receptores.',
-        [
-          {
-            text: 'OK',
-            onPress: () => navigation.goBack(),
-          },
-        ]
+    if (insertError) {
+      throw new Error(
+        insertError.message
       );
-    } catch (err: any) {
-      Alert.alert(
-        'Erro',
-        err.message ??
-          'Não foi possível criar a doação.'
-      );
-
-      showToast.error(
-        'Erro ao criar doação',
-        err.message ??
-          'Tente novamente mais tarde.',
-        'bottom'
-      );
-    } finally {
-      setLoading(false);
     }
+
+    showToast.success(
+      'Doação publicada com sucesso! 🎉',
+      'Sua doação já está visível.',
+      'bottom'
+    );
+
+    navigation.goBack();
+  } catch (err: any) {
+    console.error(
+      'handleSubmit error:',
+      err
+    );
+
+    showToast.error(
+      'Erro ao criar doação',
+      err?.message ||
+        'Tente novamente.',
+      'bottom'
+    );
+  } finally {
+    setLoading(false);
   }
+}
 
   return (
     <SafeAreaView style={s.safe}>
@@ -407,7 +420,6 @@ export default function NewDonationScreen({ navigation }: any) {
             </View>
           </View>
 
-          {/* DATA */}
           <Text style={s.label}>Validade *</Text>
 
           <TextInput

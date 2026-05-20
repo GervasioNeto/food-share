@@ -21,7 +21,7 @@ type AuthContextData = {
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (data: SignUpData) => Promise<void>;
   signOut: () => Promise<void>;
-  refreshProfile: () => Promise<void>; // ✅ ADICIONADO
+  refreshProfile: () => Promise<void>; 
 };
 
 type SignUpData = {
@@ -112,7 +112,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         signIn,
         signUp,
         signOut,
-        refreshProfile, // ✅ EXPORTADO
+        refreshProfile, 
       }}
     >
       {children}

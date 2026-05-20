@@ -40,12 +40,10 @@ export default function ChatScreen() {
   const [sending, setSending] = useState(false);
   const listRef = useRef<FlatList>(null);
 
-  // carrega mensagens iniciais
   useEffect(() => {
     fetchMessages();
   }, [roomId]);
 
-  // inscrição em tempo real para novas mensagens
   useEffect(() => {
     const channel = supabase
       .channel(`room_${roomId}`)
@@ -60,7 +58,6 @@ export default function ChatScreen() {
         (payload) => {
           const newMsg = payload.new as Message;
           setMessages((prev) => {
-            // evita duplicar mensagem que já adicionamos otimisticamente
             const exists = prev.some((m) => m.id === newMsg.id);
             if (exists) return prev;
             return [...prev, newMsg];
@@ -134,7 +131,7 @@ export default function ChatScreen() {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
     >
-      {/* cabeçalho */}
+     
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
           <Text style={styles.backText}>←</Text>
@@ -149,7 +146,6 @@ export default function ChatScreen() {
         </View>
       </View>
 
-      {/* lista de mensagens */}
       <FlatList
         ref={listRef}
         data={messages}
@@ -206,7 +202,6 @@ export default function ChatScreen() {
         }}
       />
 
-      {/* input de mensagem */}
       <View style={styles.inputRow}>
         <TextInput
           style={styles.input}

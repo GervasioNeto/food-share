@@ -147,7 +147,6 @@ export default function RegisterScreen({ navigation }: any) {
           keyboard="phone-pad"
         />
 
-        {/* Campo senha com ícone */}
         <View style={{ marginBottom: 12 }}>
           <Text style={s.label}>Senha</Text>
 

@@ -154,7 +154,6 @@ export default function RequestsScreen({ navigation }: any) {
     setActionLoading(id);
 
     try {
-      // RECUSAR
       if (status === "rejected") {
         const { error } = await supabase
           .from("requests")
@@ -164,17 +163,15 @@ export default function RequestsScreen({ navigation }: any) {
         if (error) throw error;
       }
 
-      // ACEITAR
+      
       if (status === "accepted") {
-        // aceita atual
         const { error: acceptError } = await supabase
           .from("requests")
           .update({ status: "accepted" })
           .eq("id", id);
-
         if (acceptError) throw acceptError;
 
-        // rejeita outras
+        
         const { error: rejectOthersError } =
           await supabase
             .from("requests")
@@ -188,7 +185,7 @@ export default function RequestsScreen({ navigation }: any) {
         if (rejectOthersError)
           throw rejectOthersError;
 
-        // reserva doação
+        
         const { error: donationError } =
           await supabase
             .from("donations")
@@ -197,7 +194,7 @@ export default function RequestsScreen({ navigation }: any) {
 
         if (donationError) throw donationError;
 
-        // cria chat
+        
         if (user) {
           const { error: chatError } =
             await supabase
@@ -215,7 +212,7 @@ export default function RequestsScreen({ navigation }: any) {
         }
       }
 
-      // cria notificação
+     
       const foodName =
         request.donations?.[0]?.food_name ??
         "doação";
@@ -240,7 +237,7 @@ export default function RequestsScreen({ navigation }: any) {
       if (notificationError)
         throw notificationError;
 
-      // atualiza lista local
+     
       setRequests((prev) =>
         prev.map((r) => {
           if (r.id === id) {
@@ -265,7 +262,7 @@ export default function RequestsScreen({ navigation }: any) {
         }),
       );
 
-      // toast sucesso
+      
       Toast.show({
         type: "success",
         text1:

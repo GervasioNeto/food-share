@@ -61,15 +61,12 @@ export default function NotificationsScreen({ navigation }: any) {
   }
 
   async function handlePress(item: Notification) {
-    // Marca como lida localmente de imediato (UX mais rápida)
     if (!item.read) {
       setNotifications((prev) =>
         prev.map((n) => (n.id === item.id ? { ...n, read: true } : n)),
       );
       supabase.from("notifications").update({ read: true }).eq("id", item.id);
     }
-
-    // Navega para detalhe se for uma solicitação
     if (NAVIGABLE_TYPES.has(item.type)) {
       navigation.navigate("NotificationDetail", { notificationId: item.id });
     }
@@ -142,7 +139,6 @@ export default function NotificationsScreen({ navigation }: any) {
               <Text style={s.body} numberOfLines={2}>
                 {item.body}
               </Text>
-              {/* Indicador visual de clicável */}
               {NAVIGABLE_TYPES.has(item.type) && (
                 <Text style={s.tapHint}>Toque para ver detalhes →</Text>
               )}
