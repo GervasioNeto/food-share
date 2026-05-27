@@ -16,6 +16,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 import { useAuth } from '../contexts/AuthContext';
 import { showToast } from '../components/Toast';
+import { BackButton } from '../components/BackButton';
 
 type Role = 'donor' | 'receiver';
 
@@ -84,12 +85,7 @@ export default function RegisterScreen({ navigation }: any) {
         contentContainerStyle={s.container}
         keyboardShouldPersistTaps="handled"
       >
-        <TouchableOpacity
-          style={s.back}
-          onPress={() => navigation.goBack()}
-        >
-          <Text style={s.backText}>← Voltar</Text>
-        </TouchableOpacity>
+      <BackButton onPress={() => navigation.goBack()} />
 
         <Text style={s.title}>Criar conta</Text>
 

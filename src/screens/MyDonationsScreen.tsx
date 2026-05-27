@@ -5,6 +5,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
+import { BackButton } from '../components/BackButton';
 
 type Donation = {
   id: string;
@@ -81,9 +82,7 @@ export default function MyDonationsScreen({ navigation }: any) {
   return (
     <SafeAreaView style={s.safe}>
       <View style={s.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={s.back}>← Voltar</Text>
-        </TouchableOpacity>
+      <BackButton onPress={() => navigation.goBack()} />
         <Text style={s.title}>Minhas Doações</Text>
         <TouchableOpacity style={s.addBtn} onPress={() => navigation.navigate('NewDonation')}>
           <Text style={s.addBtnText}>+ Nova</Text>

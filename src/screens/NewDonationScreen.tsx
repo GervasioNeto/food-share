@@ -19,6 +19,7 @@ import * as Location from 'expo-location';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { showToast } from '../components/Toast';
+import { BackButton } from '../components/BackButton';
 
 const UNITS = ['kg', 'g', 'litros', 'unidades', 'caixas', 'sacos'];
 
@@ -316,12 +317,7 @@ async function handleSubmit() {
           contentContainerStyle={s.container}
           keyboardShouldPersistTaps="handled"
         >
-          <TouchableOpacity
-            style={s.back}
-            onPress={() => navigation.goBack()}
-          >
-            <Text style={s.backText}>← Voltar</Text>
-          </TouchableOpacity>
+    <BackButton onPress={() => navigation.goBack()} />
 
           <Text style={s.title}>Nova Doação</Text>
 
