@@ -12,6 +12,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { supabase } from "../lib/supabase";
 import { useAuth } from "../contexts/AuthContext";
+import { BackButton } from "../components/BackButton";
 
 type Donation = {
   id: string;
@@ -136,9 +137,7 @@ export default function DonationDetailScreen({ route, navigation }: any) {
 
   return (
     <SafeAreaView style={s.safe}>
-      <TouchableOpacity style={s.backBtn} onPress={() => navigation.goBack()}>
-        <Text style={s.backText}>← Voltar</Text>
-      </TouchableOpacity>
+    <BackButton onPress={() => navigation.goBack()} />
 
       <ScrollView contentContainerStyle={s.content}>
         {donation.image_url ? (

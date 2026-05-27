@@ -17,6 +17,7 @@ import * as ImagePicker from "expo-image-picker";
 import { supabase } from "../lib/supabase";
 import { useAuth } from "../contexts/AuthContext";
 import { showToast } from "../components/Toast";
+import { BackButton } from "../components/BackButton";
 
 const ROLES = [
   { value: "receiver", label: "Receptor", icon: "🫂" },
@@ -209,9 +210,7 @@ export default function EditProfileScreen({ navigation }: any) {
           contentContainerStyle={s.container}
           keyboardShouldPersistTaps="handled"
         >
-          <TouchableOpacity style={s.back} onPress={() => navigation.goBack()}>
-            <Text style={s.backText}>← Voltar</Text>
-          </TouchableOpacity>
+    <BackButton onPress={() => navigation.goBack()} />
 
           <Text style={s.title}>Editar Perfil</Text>
           <Text style={s.subtitle}>Atualize suas informações pessoais</Text>

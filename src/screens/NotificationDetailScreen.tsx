@@ -14,6 +14,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { supabase } from "../lib/supabase";
 import { useAuth } from "../contexts/AuthContext";
+import { BackButton } from "../components/BackButton";
 
 type RequestStatus = "pending" | "accepted" | "rejected";
 
@@ -280,9 +281,7 @@ export default function NotificationDetailScreen({ route, navigation }: any) {
   return (
     <SafeAreaView style={s.safe}>
       <ScrollView contentContainerStyle={s.container}>
-        <TouchableOpacity style={s.backBtn} onPress={() => navigation.goBack()}>
-          <Text style={s.backText}>← Voltar</Text>
-        </TouchableOpacity>
+      <BackButton onPress={() => navigation.goBack()} />
 
         <View style={s.titleRow}>
           <Text style={s.pageTitle}>Solicitação</Text>
