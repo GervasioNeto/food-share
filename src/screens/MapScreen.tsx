@@ -8,6 +8,7 @@ import MapView, { Marker, PROVIDER_DEFAULT, Region } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { useFocusEffect } from '@react-navigation/native';
 import { supabase } from '../lib/supabase';
+import { ArrowRight, Locate, Map, Pin } from 'lucide-react-native';
 
 type DonationMarker = {
   id: string;
@@ -133,7 +134,7 @@ export default function MapScreen({ navigation }: any) {
           </MapView>
 
           <TouchableOpacity style={s.myLocationBtn} onPress={centerOnUser}>
-            <Text style={s.myLocationIcon}>📍</Text>
+            <Locate size={20} color="#3DDC97" />
           </TouchableOpacity>
 
           {selected && (
@@ -141,19 +142,28 @@ export default function MapScreen({ navigation }: any) {
               <View style={s.cardHandle} />
               <Text style={s.cardName}>{selected.food_name}</Text>
               <Text style={s.cardQty}>{selected.quantity} {selected.unit}</Text>
-              <Text style={s.cardAddr} numberOfLines={2}>📍 {selected.pickup_address}</Text>
+              <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 4, marginBottom: 16 }}>
+                <Pin size={13} color="#888" style={{ marginTop: 2 }} />
+                <Text style={[s.cardAddr, { marginBottom: 0 }]} numberOfLines={2}>{selected.pickup_address}</Text>
+              </View>
               <View style={s.cardButtons}>
                 <TouchableOpacity
                   style={s.cardBtnDir}
                   onPress={() => openDirections(selected)}
                 >
-                  <Text style={s.cardBtnDirText}>🗺️ Como chegar</Text>
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+                    <Map size={16} color="#FFF" />
+                    <Text style={s.cardBtnDirText}>Como chegar</Text>
+                  </View>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={s.cardBtnDetail}
                   onPress={() => navigation.navigate('DonationDetail', { donationId: selected.id })}
                 >
-                  <Text style={s.cardBtnDetailText}>Ver detalhes →</Text>
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+                    <Text style={s.cardBtnDetailText}>Ver detalhes</Text>
+                    <ArrowRight size={16} color="#0F0F0F" />
+                  </View>
                 </TouchableOpacity>
               </View>
             </View>

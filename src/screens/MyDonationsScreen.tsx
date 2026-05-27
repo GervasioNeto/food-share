@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { BackButton } from '../components/BackButton';
+import { Pin } from 'lucide-react-native';
 
 type Donation = {
   id: string;
@@ -138,7 +139,10 @@ export default function MyDonationsScreen({ navigation }: any) {
                 </View>
               </View>
               <Text style={s.qty}>{item.quantity} {item.unit}</Text>
-              <Text style={s.addr} numberOfLines={1}>📍 {item.pickup_address}</Text>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+                <Pin size={16} color="#777" />
+                <Text style={s.addr} numberOfLines={1}>{item.pickup_address}</Text>
+              </View>
               <Text style={s.expiry}>
                 Validade: {new Date(item.expiry_date).toLocaleDateString('pt-BR')}
               </Text>

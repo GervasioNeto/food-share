@@ -12,6 +12,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "../contexts/AuthContext";
 import { supabase } from "../lib/supabase";
 import { useFocusEffect } from "@react-navigation/native";
+import { Mail, Phone, Pin } from "lucide-react-native";
 
 type Stats = {
   total: number;
@@ -116,7 +117,10 @@ export default function ProfileScreen({ navigation }: any) {
           </View>
 
           {profile?.address && (
-            <Text style={s.address}>📍 {profile.address}</Text>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 4, marginTop: 4 }}>
+              <Pin size={16} color="#666" />
+              <Text style={s.address}>{profile.address}</Text>
+            </View>
           )}
         </View>
 
@@ -187,9 +191,9 @@ export default function ProfileScreen({ navigation }: any) {
         )}
 
         <View style={s.infoCard}>
-          <InfoRow icon="📧" label="E-mail" value={user?.email ?? "—"} />
+          <InfoRow icon={Mail} label="E-mail" value={user?.email ?? "—"} />
           {profile?.phone && (
-            <InfoRow icon="📞" label="Telefone" value={profile.phone} />
+            <InfoRow icon={Phone} label="Telefone" value={profile.phone} />
           )}
         </View>
 
@@ -226,17 +230,17 @@ function StatBox({
 }
 
 function InfoRow({
-  icon,
+  icon: Icon,
   label,
   value,
 }: {
-  icon: string;
+  icon: React.ElementType;
   label: string;
   value: string;
 }) {
   return (
     <View style={s.infoRow}>
-      <Text style={s.infoIcon}>{icon}</Text>
+      <Icon size={26} color="#888" />
       <View>
         <Text style={s.infoLabel}>{label}</Text>
         <Text style={s.infoValue}>{value}</Text>

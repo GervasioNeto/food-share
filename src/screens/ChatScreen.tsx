@@ -179,7 +179,7 @@ async function sendMessage() {
         ListEmptyComponent={
           <View style={styles.emptyChat}>
             <Text style={styles.emptyChatText}>
-              Diga olá e combine a entrega! 👋
+              Diga olá e combine a entrega!
             </Text>
           </View>
         }
