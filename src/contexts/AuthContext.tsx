@@ -1,13 +1,13 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { supabase } from '../lib/supabase';
-import { Session, User } from '@supabase/supabase-js';
-import { showToast } from '../components/Toast';
+import React, { createContext, useContext, useEffect, useState } from "react";
+import { supabase } from "../lib/supabase";
+import { Session, User } from "@supabase/supabase-js";
+import { showToast } from "../components/Toast";
 
 type Profile = {
   id: string;
   name: string;
   phone?: string;
-  role: 'donor' | 'receiver';
+  role: "donor" | "receiver";
   lat?: number;
   lng?: number;
   address?: string;
@@ -21,7 +21,7 @@ type AuthContextData = {
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (data: SignUpData) => Promise<void>;
   signOut: () => Promise<void>;
-  refreshProfile: () => Promise<void>; 
+  refreshProfile: () => Promise<void>;
 };
 
 type SignUpData = {
@@ -29,7 +29,7 @@ type SignUpData = {
   password: string;
   name: string;
   phone: string;
-  role: 'donor' | 'receiver';
+  role: "donor" | "receiver";
   address?: string;
 };
 
@@ -49,7 +49,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setLoading(false);
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) fetchProfile(session.user.id);
@@ -61,9 +63,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   async function fetchProfile(userId: string) {
     const { data } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
+      .from("profiles")
+      .select("*")
+      .eq("id", userId)
       .single();
 
     if (data) setProfile(data);
@@ -75,31 +77,56 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   async function signIn(email: string, password: string) {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    showToast.success('Bem-vindo de volta!', 'Login realizado com sucesso.', 'top');
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
     if (error) throw error;
+    showToast.success(
+      "Bem-vindo de volta!",
+      "Login realizado com sucesso.",
+      "top",
+    );
   }
 
-  async function signUp({ email, password, name, phone, role, address }: SignUpData) {
-    const { data, error } = await supabase.auth.signUp({ email, password });
-    showToast.success('Conta criada!', 'Bem-vindo à rede FoodShare!', 'top');
+  async function signUp({
+    email,
+    password,
+    name,
+    phone,
+    role,
+    address,
+  }: SignUpData) {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: "foodshare://auth/callback",
+      },
+    });
+
     if (error) throw error;
 
     if (data.user) {
-      const { error: profileError } = await supabase.from('profiles').insert({
+      const { error: profileError } = await supabase.from("profiles").insert({
         id: data.user.id,
         name,
         phone,
         role,
         address,
       });
+
       if (profileError) throw profileError;
     }
   }
 
   async function signOut() {
     await supabase.auth.signOut();
-    showToast.success("Desconectado", "Você saiu da sua conta com sucesso.", "bottom");
+    showToast.success(
+      "Desconectado",
+      "Você saiu da sua conta com sucesso.",
+      "bottom",
+    );
   }
 
   return (
@@ -112,7 +139,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         signIn,
         signUp,
         signOut,
-        refreshProfile, 
+        refreshProfile,
       }}
     >
       {children}
