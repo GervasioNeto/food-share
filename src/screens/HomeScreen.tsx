@@ -13,6 +13,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useFocusEffect } from "@react-navigation/native";
 import { supabase } from "../lib/supabase";
 import { useAuth } from "../contexts/AuthContext";
+import { Package, Pin } from "lucide-react-native";
 
 type Donation = {
   id: string;
@@ -86,7 +87,7 @@ export default function HomeScreen({ navigation }: any) {
       <View style={s.header}>
         <View>
           <Text style={s.greeting}>
-            Olá, {profile?.name?.split(" ")[0] ?? "visitante"} 👋
+            Olá, {profile?.name?.split(" ")[0] ?? "visitante"}!
           </Text>
           <Text style={s.sub}>Veja as doações disponíveis</Text>
         </View>
@@ -106,7 +107,10 @@ export default function HomeScreen({ navigation }: any) {
             style={s.actionChip}
             onPress={() => navigation.navigate("MyDonations")}
           >
-            <Text style={s.actionChipText}>📦 Minhas doações</Text>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+              <Package size={18 } color={s.actionChipText.color} />
+              <Text style={s.actionChipText}>Minhas doações</Text>
+            </View>
           </TouchableOpacity>
         </View>
       )}
@@ -170,10 +174,11 @@ export default function HomeScreen({ navigation }: any) {
                   {item.description}
                 </Text>
                 <View style={s.cardFooter}>
-                  <Text style={s.address} numberOfLines={1}>
-                    📍 {item.pickup_address}
-                  </Text>
-                  <Text style={s.donor}>por {item.profiles?.name}</Text>
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: 4, flex: 1 }}>
+                    <Pin size={12} color="#777" />
+                    <Text style={s.address} numberOfLines={1}>{item.pickup_address}</Text>
+                  </View>
+                  <Text style={s.donor} numberOfLines={1}>por {item.profiles?.name}</Text>
                 </View>
               </TouchableOpacity>
             );
@@ -283,7 +288,7 @@ const s = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
   },
-  address: { fontSize: 12, color: "#777", flex: 1 },
+  address: { fontSize: 14, color: "#777", flex: 1 },
   donor: { fontSize: 12, color: "#555" },
   empty: { alignItems: "center", marginTop: 60 },
   emptyIcon: { fontSize: 48, marginBottom: 12 },

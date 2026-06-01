@@ -5,9 +5,9 @@ import { Toast } from "../components/Toast";
 import { toastConfig } from "../components/Toast/toastConfig";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { Text } from "react-native";
 import { useAuth } from "../contexts/AuthContext";
 import { supabase } from "../lib/supabase";
+import { Bell, Home, Map, MessageSquare, User } from "lucide-react-native";
 
 import LoginScreen from "../screens/LoginScreen";
 import RegisterScreen from "../screens/RegisterScreen";
@@ -34,19 +34,17 @@ const DARK = "#1a1a1a";
 const GRAY = "#888";
 
 function TabIcon({ name, focused }: { name: string; focused: boolean }) {
-  const icons: Record<string, string> = {
-    Início: "🏠",
-    Mapa: "🗺️",
-    Chats: "💬",
-    Alertas: "🔔",
-    Perfil: "👤",
+  const icons: Record<string, React.ElementType> = {
+    Início: Home,
+    Mapa: Map,
+    Chats: MessageSquare,
+    Alertas: Bell,
+    Perfil: User,
   };
 
-  return (
-    <Text style={{ fontSize: 20, opacity: focused ? 1 : 0.5 }}>
-      {icons[name]}
-    </Text>
-  );
+  const Icon = icons[name];
+  const color = focused ? GREEN : GRAY;
+  return <Icon size={24} color={color} />;
 }
 
 function MainTabs() {
@@ -54,7 +52,8 @@ function MainTabs() {
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
-        tabBarStyle: { backgroundColor: DARK, borderTopColor: "#333" },
+        tabBarStyle: { backgroundColor: DARK, borderTopColor: "#333", paddingTop: 0, height: 65 },
+        tabBarLabelStyle: { fontSize: 14, fontWeight: "bold" },
         tabBarActiveTintColor: GREEN,
         tabBarInactiveTintColor: GRAY,
         tabBarIcon: ({ focused }) => (

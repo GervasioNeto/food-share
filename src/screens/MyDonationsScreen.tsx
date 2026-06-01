@@ -14,6 +14,7 @@ import { supabase } from "../lib/supabase";
 import { useAuth } from "../contexts/AuthContext";
 import { BackButton } from "../components/BackButton";
 import { showToast } from "../components/Toast";
+import { Pin, CircleCheckBig, Trash2 } from "lucide-react-native";
 
 type Donation = {
   id: string;
@@ -228,9 +229,10 @@ export default function MyDonationsScreen({ navigation }: any) {
               <Text style={s.qty}>
                 {item.quantity} {item.unit}
               </Text>
-              <Text style={s.addr} numberOfLines={1}>
-                📍 {item.pickup_address}
-              </Text>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+                <Pin size={16} color="#777" />
+                <Text style={s.addr} numberOfLines={1}>{item.pickup_address}</Text>
+              </View>
               <Text style={s.expiry}>
                 Validade:{" "}
                 {new Date(item.expiry_date).toLocaleDateString("pt-BR")}
@@ -243,16 +245,20 @@ export default function MyDonationsScreen({ navigation }: any) {
                       style={s.actionBtn}
                       onPress={() => handleComplete(item.id)}
                     >
-                      <Text style={s.actionBtnText}>✅ Concluir</Text>
+                      <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+                        <CircleCheckBig size={16} color="#3DDC97" />
+                        <Text style={s.actionBtnText}>Concluir</Text>
+                      </View>
                     </TouchableOpacity>
                   )}
                   <TouchableOpacity
                     style={[s.actionBtn, s.actionBtnDanger]}
                     onPress={() => handleDelete(item.id)}
                   >
-                    <Text style={[s.actionBtnText, { color: "#FF4D4D" }]}>
-                      🗑 Excluir
-                    </Text>
+                    <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+                      <Trash2 size={16} color="#FF4D4D" />
+                      <Text style={[s.actionBtnText, { color: "#FF4D4D" }]}>Excluir</Text>
+                    </View>
                   </TouchableOpacity>
                 </View>
               )}
