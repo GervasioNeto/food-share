@@ -1,157 +1,190 @@
-# 🥦 FoodShare
+# FoodShare
 
-Aplicativo mobile de doação e redistribuição de alimentos desenvolvido como projeto extensionista da Universidade de Fortaleza (UNIFOR).
+A mobile application for food donation and redistribution, developed as an extension project at the University of Fortaleza (UNIFOR).
 
-> **Disciplina:** Desenvolvimento de Plataformas Móveis
-
----
-
-## 📋 Descrição
-
-O FoodShare conecta **doadores de alimentos** (restaurantes e pessoas físicas) a **ONGs e indivíduos** que necessitam. A plataforma permite cadastrar doações, localizar oportunidades próximas por geolocalização e facilitar a redistribuição de alimentos de forma eficiente.
+> **Course:** Mobile Platform Development
 
 ---
 
-## 🚀 Tecnologias
+## Description
 
-- **React Native** com [Expo](https://expo.dev/) (SDK 54)
-- **TypeScript**
-- **Supabase** — autenticação, banco de dados e storage
-- **React Navigation** — bottom tabs + stack
-- **react-native-maps** — mapa de doações
-- **expo-image-picker** — upload de fotos
-- **expo-location** — geolocalização
+FoodShare connects **food donors** (restaurants and individuals) with **NGOs and individuals in need**. The platform allows donors to register food items, and receivers to find and request nearby donations through geolocation. The app handles the full donation lifecycle: listing, requesting, chat-based coordination, and completion tracking.
 
 ---
 
-## 📱 Telas
+## Technologies
 
-| Tela              | Descrição                                |
-| ----------------- | ---------------------------------------- |
-| Login             | Autenticação com e-mail e senha          |
-| Cadastro          | Criação de conta como Doador ou Receptor |
-| Home              | Lista de doações disponíveis com busca   |
-| Mapa              | Visualização das doações no mapa         |
-| Detalhe da Doação | Informações completas + solicitação      |
-| Nova Doação       | Formulário para cadastrar doação         |
-| Minhas Doações    | Histórico e gerenciamento (doador)       |
-| Solicitações      | Aprovar ou recusar pedidos (doador)      |
-| Notificações      | Alertas de solicitações e atualizações   |
-| Perfil & Impacto  | Dados do usuário e métricas de doações   |
-
----
-
-## ✅ Requisitos Funcionais
-
-| ID   | Nome                                     | Status |
-| ---- | ---------------------------------------- | ------ |
-| RF01 | Cadastro de Usuários (doador/receptor)   |
-| RF02 | Autenticação (login/logout)              |
-| RF03 | Edição de Perfil                         |
-| RF04 | Cadastro de Doação                       |
-| RF05 | Gerenciamento de Doação (editar/excluir) |
-| RF06 | Visualização de Solicitações             |
-| RF07 | Aprovação/Recusa de Solicitações         |
-| RF08 | Lista de Doações disponíveis             |
-| RF09 | Mapa de Doações com geolocalização       |
-| RF10 | Atualização de Status da doação          |
-| RF11 | Histórico do Doador                      |
-| RF12 | Histórico do Receptor                    |
-| RF13 | Métricas de Impacto                      |
+| Technology | Version | Purpose |
+|---|---|---|
+| React Native + Expo | SDK 54 | Cross-platform mobile framework |
+| TypeScript | ~5.9 | Static typing |
+| Supabase | ^2.102 | Auth, database, storage, real-time |
+| React Navigation | ^7 | Stack + bottom-tab navigation |
+| react-native-maps | 1.20.1 | Interactive donation map |
+| expo-location | ~19.0 | Geolocation and address geocoding |
+| expo-image-picker | ~17.0 | Photo upload for donations and avatars |
+| lucide-react-native | ^1.17 | Icon library |
+| react-native-toast-message | ^2.3 | User feedback toasts |
 
 ---
 
-## ⚙️ Como rodar o projeto
+## Screens
 
-### Pré-requisitos
+| Screen | Description |
+|---|---|
+| Login | Email and password authentication with "forgot password" link |
+| Register | Account creation as Donor or Receiver, with role-based fields |
+| Forgot Password | Sends a recovery link to the user's email via Supabase Auth |
+| Reset Password | Sets a new password after clicking the recovery deep link |
+| Home | Main feed of available donations with search and filtering |
+| Map | Interactive map showing donation pins by geolocation |
+| Donation Detail | Full donation info with request button (receivers) or owner note (donors) |
+| New Donation | Form to create a donation with photo, food details, expiry date, and address |
+| My Donations | Donor's list of all their donations with status filters and expiry badge |
+| Requests | Donor view to accept or reject incoming donation requests |
+| Chat List | List of active chat rooms opened after a request is accepted |
+| Chat | Real-time messaging between donor and receiver to coordinate pickup |
+| Notifications | Feed of activity alerts (requests, acceptances, rejections, expiry) |
+| Notification Detail | Detail view of a notification-linked request with accept/reject actions |
+| Profile | User profile with role badge, contact info, and impact stats |
+| Edit Profile | Form to update name, phone, address, and avatar |
+
+---
+
+## Donation Flow
+
+1. Donor creates a donation (food details, photo, expiry date, pickup address)
+2. Address is geocoded to coordinates for map display
+3. Donation appears on the Home feed and Map with **Available** status
+4. Receiver requests the donation — donor receives a notification
+5. Donor accepts the request — other pending requests are auto-rejected, a chat room is created, and both parties are notified
+6. Donor and receiver use the in-app chat to arrange pickup
+7. Donor marks the donation as **Completed**
+8. Impact stats update for both donor and receiver
+
+### Expiry handling
+
+- Donations with a past expiry date are **filtered out of public feeds** (Home and Map)
+- In the donor's "My Donations" screen, expired items remain visible with an **Expired** badge in red
+- On screen load, the app detects newly expired donations and sends the donor a notification
+
+---
+
+## Role-Based Access
+
+| Feature | Donor | Receiver |
+|---|---|---|
+| Create donations | Yes | No |
+| View donation feed | Yes | Yes |
+| Request a donation | No | Yes |
+| Manage requests | Yes | No |
+| In-app chat | Yes | Yes |
+| Impact stats | Total donated, kg | Total received, kg |
+
+---
+
+## Getting Started
+
+### Prerequisites
 
 - [Node.js](https://nodejs.org/) 18+
 - [Expo CLI](https://docs.expo.dev/get-started/installation/)
-- Conta no [Supabase](https://supabase.com/)
+- A [Supabase](https://supabase.com/) project
 
-### Instalação
+### Installation
 
 ```bash
-# Clone o repositório
 git clone https://github.com/GervasioNeto/food-share.git
 cd food-share
-
-# Instale as dependências
 npm install
 ```
 
-### Configuração do ambiente
+### Environment setup
 
-Crie um arquivo `.env` na raiz do projeto com base no `.env.example`:
+Create a `.env` file at the project root based on `.env.example`:
 
 ```bash
 cp .env.example .env
 ```
 
-Preencha com as credenciais do seu projeto Supabase:
+Fill in your Supabase project credentials:
 
 ```env
-EXPO_PUBLIC_SUPABASE_URL=https://SEU-PROJETO.supabase.co
-EXPO_PUBLIC_SUPABASE_ANON_KEY=sua-anon-key-aqui
+EXPO_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+EXPO_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 ```
 
-### Banco de dados
+### Database
 
-Execute o SQL disponível em [`docs/schema.sql`](docs/schema.sql) no **SQL Editor** do Supabase para criar as tabelas necessárias (`profiles`, `donations`, `requests`, `notifications`).
+Run the SQL in [`docs/schema.sql`](docs/schema.sql) in the Supabase SQL Editor to create all required tables.
 
-### Executar
+### Running the app
 
 ```bash
 npx expo start
 ```
 
-| Plataforma | Comando                    |
-| ---------- | -------------------------- |
-| Android    | `npx expo start --android` |
-| iOS        | `npx expo start --ios`     |
-| Web        | `npx expo start --web`     |
+| Platform | Command |
+|---|---|
+| Android | `npx expo start --android` |
+| iOS | `npx expo start --ios` |
+| Web | `npx expo start --web` |
 
 ---
 
-## 🗄️ Estrutura do Banco de Dados
+## Database Schema
 
-```
-profiles      — dados do usuário (nome, papel, endereço)
-donations     — doações cadastradas pelos doadores
-requests      — solicitações feitas pelos receptores
-notifications — notificações enviadas aos usuários
-```
+| Table | Description |
+|---|---|
+| `profiles` | User data: name, role (donor/receiver), phone, address, coordinates, avatar |
+| `donations` | Food items with status lifecycle (available → reserved → completed) and expiry date |
+| `requests` | Receiver requests linked to a donation (pending / accepted / rejected) |
+| `chat_rooms` | One room created per accepted request, linking donor, receiver, and donation |
+| `messages` | Chat messages within a room |
+| `notifications` | Activity notifications with type-based routing (request, accepted, rejected, available, general) |
 
 ---
 
-## 📂 Estrutura do Projeto
+## Project Structure
 
 ```
 src/
+├── components/
+│   ├── BackButton.tsx        # Reusable back navigation button
+│   └── Toast/                # Toast notification utility
+│       ├── index.tsx
+│       └── toastConfig.tsx
 ├── contexts/
-│   └── AuthContext.tsx     # Contexto de autenticação
+│   └── AuthContext.tsx       # Global auth state and profile management
 ├── lib/
-│   └── supabase.ts         # Cliente Supabase
+│   └── supabase.ts           # Supabase client
 ├── navigation/
-│   └── navigation.tsx      # Configuração de rotas
+│   ├── index.tsx             # Root navigator with auth gate and deep link handling
+│   └── navigation.tsx        # Tab and stack route definitions
 └── screens/
     ├── LoginScreen.tsx
     ├── RegisterScreen.tsx
+    ├── ForgotPasswordScreen.tsx
+    ├── ResetPasswordScreen.tsx
     ├── HomeScreen.tsx
     ├── MapScreen.tsx
     ├── DonationDetailScreen.tsx
     ├── NewDonationScreen.tsx
     ├── MyDonationsScreen.tsx
     ├── RequestsScreen.tsx
+    ├── ChatListScreen.tsx
+    ├── ChatScreen.tsx
     ├── NotificationsScreen.tsx
-    └── ProfileScreen.tsx
+    ├── NotificationDetailScreen.tsx
+    ├── ProfileScreen.tsx
+    └── EditProfileScreen.tsx
 ```
 
 ---
 
-## 📌 Observações
+## Notes
 
-- O sistema **não intermedia pagamentos** entre usuários
-- O sistema **não garante qualidade sanitária** dos alimentos
-- Destinado exclusivamente a **fins não comerciais**
-- Requer conexão com internet (sem modo offline)
+- The system does **not** process payments between users
+- The system does **not** guarantee the sanitary quality of food items
+- Intended exclusively for **non-commercial** use
+- Requires an active internet connection — no offline mode
