@@ -6,7 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { BackButton } from '../components/BackButton';
-import { Pin } from 'lucide-react-native';
+import { Pin, CircleCheckBig, Trash2 } from 'lucide-react-native';
 
 type Donation = {
   id: string;
@@ -154,14 +154,20 @@ export default function MyDonationsScreen({ navigation }: any) {
                       style={s.actionBtn}
                       onPress={() => handleComplete(item.id)}
                     >
-                      <Text style={s.actionBtnText}>✅ Concluir</Text>
+                      <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+                        <CircleCheckBig size={16} color="#3DDC97" />
+                        <Text style={s.actionBtnText}>Concluir</Text>
+                      </View>
                     </TouchableOpacity>
                   )}
                   <TouchableOpacity
                     style={[s.actionBtn, s.actionBtnDanger]}
                     onPress={() => handleDelete(item.id)}
                   >
-                    <Text style={[s.actionBtnText, { color: '#FF4D4D' }]}>🗑 Excluir</Text>
+                    <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+                      <Trash2 size={16} color="#FF4D4D" />
+                      <Text style={[s.actionBtnText, { color: '#FF4D4D' }]}>Excluir</Text>
+                    </View>
                   </TouchableOpacity>
                 </View>
               )}

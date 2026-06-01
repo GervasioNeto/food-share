@@ -12,7 +12,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "../contexts/AuthContext";
 import { supabase } from "../lib/supabase";
 import { useFocusEffect } from "@react-navigation/native";
-import { Mail, Phone, Pin } from "lucide-react-native";
+import { Mail, Phone, Pin, Leaf } from "lucide-react-native";
 
 type Stats = {
   total: number;
@@ -127,7 +127,10 @@ export default function ProfileScreen({ navigation }: any) {
       
         {profile?.role === "donor" && (
           <View style={s.impactCard}>
-            <Text style={s.impactTitle}>🌱 Seu impacto</Text>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 16 }}>
+              <Leaf size={16} color="#3DDC97" />
+              <Text style={[s.impactTitle, { marginBottom: 0 }]}>Seu impacto</Text>
+            </View>
 
             <View style={s.statsRow}>
               <StatBox value={stats.total} label="Doações" />
