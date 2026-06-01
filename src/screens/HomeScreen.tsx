@@ -41,6 +41,7 @@ export default function HomeScreen({ navigation }: any) {
       .from("donations")
       .select("*, profiles(name)")
       .eq("status", "available")
+      .gte("expiry_date", new Date().toISOString().split("T")[0])
       .order("created_at", { ascending: false });
     if (data) {
       setDonations(data as Donation[]);

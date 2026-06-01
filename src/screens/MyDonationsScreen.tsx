@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import {
   View,
   Text,
@@ -32,13 +32,23 @@ const STATUS_LABEL: Record<string, string> = {
   available: "Disponível",
   reserved: "Reservado",
   completed: "Concluído",
+  expired: "Expirada",
 };
 
 const STATUS_COLOR: Record<string, string> = {
   available: "#3DDC97",
   reserved: "#FFA500",
   completed: "#888",
+  expired: "#FF4D4D",
 };
+
+function todayStr() {
+  return new Date().toISOString().split("T")[0];
+}
+
+function isExpired(expiry_date: string) {
+  return expiry_date < todayStr();
+}
 
 const FILTERS = ["Todas", "available", "reserved", "completed"] as const;
 const FILTER_LABEL: Record<string, string> = {
@@ -54,6 +64,7 @@ export default function MyDonationsScreen({ navigation }: any) {
   const [filter, setFilter] = useState<(typeof FILTERS)[number]>("Todas");
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const notifiedIds = useRef<Set<string>>(new Set());
 
   const fetch = useCallback(async () => {
     if (!user) return;
@@ -62,7 +73,22 @@ export default function MyDonationsScreen({ navigation }: any) {
       .select("*")
       .eq("donor_id", user.id)
       .order("created_at", { ascending: false });
-    if (data) setDonations(data as Donation[]);
+    if (data) {
+      setDonations(data as Donation[]);
+      const expired = (data as Donation[]).filter(
+        (d) => d.status === "available" && isExpired(d.expiry_date)
+      );
+      for (const d of expired) {
+        if (notifiedIds.current.has(d.id)) continue;
+        notifiedIds.current.add(d.id);
+        await supabase.from("notifications").insert({
+          user_id: user.id,
+          title: "Doação expirada",
+          body: `Sua doação "${d.food_name}" venceu e foi removida dos feeds.`,
+          type: "general",
+        });
+      }
+    }
     setLoading(false);
     setRefreshing(false);
   }, [user]);
@@ -140,10 +166,12 @@ export default function MyDonationsScreen({ navigation }: any) {
     );
   }
 
-  const filtered =
-    filter === "Todas"
-      ? donations
-      : donations.filter((d) => d.status === filter);
+  const filtered = (() => {
+    if (filter === "Todas") return donations;
+    if (filter === "available")
+      return donations.filter((d) => d.status === "available" && !isExpired(d.expiry_date));
+    return donations.filter((d) => d.status === filter);
+  })();
 
   return (
     <SafeAreaView style={s.safe}>
@@ -201,58 +229,73 @@ export default function MyDonationsScreen({ navigation }: any) {
               <Text style={s.emptyText}>Nenhuma doação nesta categoria</Text>
             </View>
           }
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              style={s.card}
-              onPress={() =>
-                navigation.navigate("DonationDetail", { donation: item })
-              }
-              activeOpacity={0.8}
-            >
-              <View style={s.cardTop}>
-                <Text style={s.foodName} numberOfLines={1}>
-                  {item.food_name}
-                </Text>
-                <View
-                  style={[
-                    s.badge,
-                    { backgroundColor: STATUS_COLOR[item.status] + "22" },
-                  ]}
-                >
-                  <Text
-                    style={[s.badgeText, { color: STATUS_COLOR[item.status] }]}
-                  >
-                    {STATUS_LABEL[item.status]}
+          renderItem={({ item }) => {
+            const expired = item.status === "available" && isExpired(item.expiry_date);
+            const badgeKey = expired ? "expired" : item.status;
+            return (
+              <TouchableOpacity
+                style={s.card}
+                onPress={() =>
+                  navigation.navigate("DonationDetail", { donation: item })
+                }
+                activeOpacity={0.8}
+              >
+                <View style={s.cardTop}>
+                  <Text style={s.foodName} numberOfLines={1}>
+                    {item.food_name}
                   </Text>
+                  <View
+                    style={[
+                      s.badge,
+                      { backgroundColor: STATUS_COLOR[badgeKey] + "22" },
+                    ]}
+                  >
+                    <Text
+                      style={[s.badgeText, { color: STATUS_COLOR[badgeKey] }]}
+                    >
+                      {STATUS_LABEL[badgeKey]}
+                    </Text>
+                  </View>
                 </View>
-              </View>
-              <Text style={s.qty}>
-                {item.quantity} {item.unit}
-              </Text>
-              <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
-                <Pin size={16} color="#777" />
-                <Text style={s.addr} numberOfLines={1}>{item.pickup_address}</Text>
-              </View>
-              <Text style={s.expiry}>
-                Validade:{" "}
-                {new Date(item.expiry_date).toLocaleDateString("pt-BR")}
-              </Text>
+                <Text style={s.qty}>
+                  {item.quantity} {item.unit}
+                </Text>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+                  <Pin size={16} color="#777" />
+                  <Text style={s.addr} numberOfLines={1}>{item.pickup_address}</Text>
+                </View>
+                <Text style={[s.expiry, expired && { color: "#FF4D4D" }]}>
+                  Validade:{" "}
+                  {new Date(item.expiry_date).toLocaleDateString("pt-BR")}
+                </Text>
 
-              {item.status !== "completed" && (
-                <View style={s.actions}>
-                  {item.status === "available" && (
+                {item.status !== "completed" && !expired && (
+                  <View style={s.actions}>
+                    {item.status === "available" && (
+                      <TouchableOpacity
+                        style={s.actionBtn}
+                        onPress={() => handleComplete(item.id)}
+                      >
+                        <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+                          <CircleCheckBig size={16} color="#3DDC97" />
+                          <Text style={s.actionBtnText}>Concluir</Text>
+                        </View>
+                      </TouchableOpacity>
+                    )}
                     <TouchableOpacity
-                      style={s.actionBtn}
-                      onPress={() => handleComplete(item.id)}
+                      style={[s.actionBtn, s.actionBtnDanger]}
+                      onPress={() => handleDelete(item.id)}
                     >
                       <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
-                        <CircleCheckBig size={16} color="#3DDC97" />
-                        <Text style={s.actionBtnText}>Concluir</Text>
+                        <Trash2 size={16} color="#FF4D4D" />
+                        <Text style={[s.actionBtnText, { color: "#FF4D4D" }]}>Excluir</Text>
                       </View>
                     </TouchableOpacity>
-                  )}
+                  </View>
+                )}
+                {expired && (
                   <TouchableOpacity
-                    style={[s.actionBtn, s.actionBtnDanger]}
+                    style={[s.actionBtn, s.actionBtnDanger, { marginTop: 8 }]}
                     onPress={() => handleDelete(item.id)}
                   >
                     <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
@@ -260,10 +303,10 @@ export default function MyDonationsScreen({ navigation }: any) {
                       <Text style={[s.actionBtnText, { color: "#FF4D4D" }]}>Excluir</Text>
                     </View>
                   </TouchableOpacity>
-                </View>
-              )}
-            </TouchableOpacity>
-          )}
+                )}
+              </TouchableOpacity>
+            );
+          }}
         />
       )}
     </SafeAreaView>

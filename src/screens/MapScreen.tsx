@@ -70,6 +70,7 @@ export default function MapScreen({ navigation }: any) {
       .from('donations')
       .select('id, food_name, quantity, unit, pickup_address, lat, lng')
       .eq('status', 'available')
+      .gte('expiry_date', new Date().toISOString().split('T')[0])
       .not('lat', 'is', null);
     if (data) setMarkers(data as DonationMarker[]);
     setLoadingDonations(false);
