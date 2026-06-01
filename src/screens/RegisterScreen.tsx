@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -10,41 +10,38 @@ import {
   ScrollView,
   ActivityIndicator,
   Alert,
-} from 'react-native';
+} from "react-native";
 
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons } from "@expo/vector-icons";
 
-import { useAuth } from '../contexts/AuthContext';
-import { showToast } from '../components/Toast';
+import { useAuth } from "../contexts/AuthContext";
+import { showToast } from "../components/Toast";
+import { BackButton } from "../components/BackButton";
+import { supabase } from "../lib/supabase";
 
-type Role = 'donor' | 'receiver';
+type Role = "donor" | "receiver";
 
 export default function RegisterScreen({ navigation }: any) {
   const { signUp } = useAuth();
 
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
-  const [password, setPassword] = useState('');
-  const [address, setAddress] = useState('');
-  const [role, setRole] = useState<Role>('receiver');
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [password, setPassword] = useState("");
+  const [address, setAddress] = useState("");
+  const [role, setRole] = useState<Role>("receiver");
 
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
   async function handleRegister() {
     if (!name || !email || !password) {
-      Alert.alert(
-        'Atenção',
-        'Nome, e-mail e senha são obrigatórios.'
-      );
-
+      Alert.alert("Atenção", "Nome, e-mail e senha são obrigatórios.");
       showToast.error(
-        'Preencha os campos obrigatórios.',
-        'Email, senha e nome são necessários.',
-        'bottom'
+        "Campos obrigatórios",
+        "Nome, e-mail e senha são necessários.",
+        "bottom",
       );
-
       return;
     }
 
@@ -57,18 +54,30 @@ export default function RegisterScreen({ navigation }: any) {
         name,
         phone,
         role,
-        ...(role === 'receiver' && { address }),
+        ...(role === "receiver" && { address }),
       });
 
+      await supabase.auth.signOut();
+
       showToast.success(
-        'Conta criada!',
-        'Bem-vindo à rede FoodShare!',
-        'bottom'
+        "Verifique seu e-mail",
+        "Enviamos um link de confirmação para " + email.trim() + ".",
+        "bottom",
+      );
+
+      Alert.alert(
+        "Confirme seu e-mail",
+        "Enviamos um link de confirmação para " +
+          email.trim() +
+          ". Acesse seu e-mail para ativar sua conta.",
+        [{ text: "OK", onPress: () => navigation.goBack() }],
       );
     } catch (err: any) {
-      Alert.alert(
-        'Erro ao cadastrar',
-        err.message ?? 'Tente novamente.'
+      Alert.alert("Erro ao cadastrar", err.message ?? "Tente novamente.");
+      showToast.error(
+        "Erro ao cadastrar",
+        err.message ?? "Tente novamente.",
+        "bottom",
       );
     } finally {
       setLoading(false);
@@ -77,47 +86,30 @@ export default function RegisterScreen({ navigation }: any) {
 
   return (
     <KeyboardAvoidingView
-      style={{ flex: 1, backgroundColor: '#0F0F0F' }}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={{ flex: 1, backgroundColor: "#0F0F0F" }}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
       <ScrollView
         contentContainerStyle={s.container}
         keyboardShouldPersistTaps="handled"
       >
-        <TouchableOpacity
-          style={s.back}
-          onPress={() => navigation.goBack()}
-        >
-          <Text style={s.backText}>← Voltar</Text>
-        </TouchableOpacity>
+        <BackButton onPress={() => navigation.goBack()} />
 
         <Text style={s.title}>Criar conta</Text>
 
-        <Text style={s.subtitle}>
-          Junte-se à rede FoodShare
-        </Text>
+        <Text style={s.subtitle}>Junte-se à rede FoodShare</Text>
 
         <Text style={s.sectionLabel}>Você é:</Text>
 
         <View style={s.roleRow}>
-          {(['receiver', 'donor'] as Role[]).map((r) => (
+          {(["receiver", "donor"] as Role[]).map((r) => (
             <TouchableOpacity
               key={r}
-              style={[
-                s.roleBtn,
-                role === r && s.roleBtnActive,
-              ]}
+              style={[s.roleBtn, role === r && s.roleBtnActive]}
               onPress={() => setRole(r)}
             >
-              <Text
-                style={[
-                  s.roleBtnText,
-                  role === r && s.roleBtnTextActive,
-                ]}
-              >
-                {r === 'receiver'
-                  ? '🙋 Receptor'
-                  : '🤝 Doador'}
+              <Text style={[s.roleBtnText, role === r && s.roleBtnTextActive]}>
+                {r === "receiver" ? "🙋 Receptor" : "🤝 Doador"}
               </Text>
             </TouchableOpacity>
           ))}
@@ -160,13 +152,9 @@ export default function RegisterScreen({ navigation }: any) {
               secureTextEntry={!showPassword}
             />
 
-            <TouchableOpacity
-              onPress={() =>
-                setShowPassword(!showPassword)
-              }
-            >
+            <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
               <Ionicons
-                name={showPassword ? 'eye-off' : 'eye'}
+                name={showPassword ? "eye-off" : "eye"}
                 size={22}
                 color="#888"
               />
@@ -174,7 +162,7 @@ export default function RegisterScreen({ navigation }: any) {
           </View>
         </View>
 
-        {role === 'receiver' && (
+        {role === "receiver" && (
           <Field
             label="Endereço"
             value={address}
@@ -191,20 +179,13 @@ export default function RegisterScreen({ navigation }: any) {
           {loading ? (
             <ActivityIndicator color="#0F0F0F" />
           ) : (
-            <Text style={s.btnText}>
-              Criar conta
-            </Text>
+            <Text style={s.btnText}>Criar conta</Text>
           )}
         </TouchableOpacity>
 
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-        >
+        <TouchableOpacity onPress={() => navigation.goBack()}>
           <Text style={s.link}>
-            Já tem conta?{' '}
-            <Text style={s.linkAccent}>
-              Entrar
-            </Text>
+            Já tem conta? <Text style={s.linkAccent}>Entrar</Text>
           </Text>
         </TouchableOpacity>
       </ScrollView>
@@ -230,10 +211,8 @@ function Field({
         onChangeText={onChange}
         placeholder={placeholder}
         placeholderTextColor="#555"
-        keyboardType={keyboard ?? 'default'}
-        autoCapitalize={
-          autoCapitalize ?? 'sentences'
-        }
+        keyboardType={keyboard ?? "default"}
+        autoCapitalize={autoCapitalize ?? "sentences"}
       />
     </View>
   );
@@ -250,31 +229,31 @@ const s = StyleSheet.create({
   },
 
   backText: {
-    color: '#3DDC97',
+    color: "#3DDC97",
     fontSize: 15,
   },
 
   title: {
     fontSize: 28,
-    fontWeight: '700',
-    color: '#FFF',
+    fontWeight: "700",
+    color: "#FFF",
     marginBottom: 4,
   },
 
   subtitle: {
     fontSize: 14,
-    color: '#888',
+    color: "#888",
     marginBottom: 24,
   },
 
   sectionLabel: {
-    color: '#CCC',
+    color: "#CCC",
     fontSize: 13,
     marginBottom: 8,
   },
 
   roleRow: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 12,
     marginBottom: 20,
   },
@@ -284,81 +263,81 @@ const s = StyleSheet.create({
     padding: 14,
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: '#2E2E2E',
-    alignItems: 'center',
-    backgroundColor: '#1E1E1E',
+    borderColor: "#2E2E2E",
+    alignItems: "center",
+    backgroundColor: "#1E1E1E",
   },
 
   roleBtnActive: {
-    borderColor: '#3DDC97',
-    backgroundColor: '#1a2e25',
+    borderColor: "#3DDC97",
+    backgroundColor: "#1a2e25",
   },
 
   roleBtnText: {
-    color: '#888',
-    fontWeight: '600',
+    color: "#888",
+    fontWeight: "600",
   },
 
   roleBtnTextActive: {
-    color: '#3DDC97',
+    color: "#3DDC97",
   },
 
   label: {
-    color: '#CCC',
+    color: "#CCC",
     fontSize: 13,
     marginBottom: 4,
   },
 
   input: {
-    backgroundColor: '#1E1E1E',
-    color: '#FFF',
+    backgroundColor: "#1E1E1E",
+    color: "#FFF",
     borderRadius: 10,
     padding: 14,
     fontSize: 15,
     borderWidth: 1,
-    borderColor: '#2E2E2E',
+    borderColor: "#2E2E2E",
   },
 
   passwordContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#1E1E1E',
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#1E1E1E",
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: '#2E2E2E',
+    borderColor: "#2E2E2E",
     paddingHorizontal: 14,
   },
 
   passwordInput: {
     flex: 1,
-    color: '#FFF',
+    color: "#FFF",
     paddingVertical: 14,
     fontSize: 15,
   },
 
   btn: {
-    backgroundColor: '#3DDC97',
+    backgroundColor: "#3DDC97",
     borderRadius: 10,
     padding: 16,
-    alignItems: 'center',
+    alignItems: "center",
     marginTop: 8,
     marginBottom: 16,
   },
 
   btnText: {
-    color: '#0F0F0F',
-    fontWeight: '700',
+    color: "#0F0F0F",
+    fontWeight: "700",
     fontSize: 16,
   },
 
   link: {
-    color: '#888',
-    textAlign: 'center',
+    color: "#888",
+    textAlign: "center",
     fontSize: 14,
   },
 
   linkAccent: {
-    color: '#3DDC97',
-    fontWeight: '600',
+    color: "#3DDC97",
+    fontWeight: "600",
   },
 });

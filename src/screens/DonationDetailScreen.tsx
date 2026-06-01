@@ -12,6 +12,8 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { supabase } from "../lib/supabase";
 import { useAuth } from "../contexts/AuthContext";
+import { BackButton } from "../components/BackButton";
+import { CalendarDays, Pin, User } from "lucide-react-native";
 
 type Donation = {
   id: string;
@@ -136,9 +138,7 @@ export default function DonationDetailScreen({ route, navigation }: any) {
 
   return (
     <SafeAreaView style={s.safe}>
-      <TouchableOpacity style={s.backBtn} onPress={() => navigation.goBack()}>
-        <Text style={s.backText}>← Voltar</Text>
-      </TouchableOpacity>
+    <BackButton onPress={() => navigation.goBack()} />
 
       <ScrollView contentContainerStyle={s.content}>
         {donation.image_url ? (
@@ -177,20 +177,13 @@ export default function DonationDetailScreen({ route, navigation }: any) {
         <Text style={s.description}>{donation.description}</Text>
 
         <View style={s.infoSection}>
-          <InfoRow icon="📅" label="Validade" value={expiryDate} />
-          <InfoRow icon="📍" label="Retirada" value={donation.pickup_address} />
+          <InfoRow icon={CalendarDays} label="Validade" value={expiryDate} />
+          <InfoRow icon={Pin} label="Retirada" value={donation.pickup_address} />
           <InfoRow
-            icon="👤"
+            icon={User}
             label="Doador"
             value={donation.profiles?.name ?? "—"}
           />
-          {isOwner && donation.profiles?.phone && (
-            <InfoRow
-              icon="📞"
-              label="Telefone"
-              value={donation.profiles.phone}
-            />
-          )}
         </View>
 
         {isReceiver && status === "available" && !isOwner && (
@@ -224,17 +217,17 @@ export default function DonationDetailScreen({ route, navigation }: any) {
 }
 
 function InfoRow({
-  icon,
+  icon: Icon,
   label,
   value,
 }: {
-  icon: string;
+  icon: React.ElementType;
   label: string;
   value: string;
 }) {
   return (
     <View style={s.infoRow}>
-      <Text style={s.infoIcon}>{icon}</Text>
+      <Icon size={28} color="#888" style={{ marginTop: 1 }} />
       <View style={{ flex: 1 }}>
         <Text style={s.infoLabel}>{label}</Text>
         <Text style={s.infoValue}>{value}</Text>

@@ -10,6 +10,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { supabase } from "../lib/supabase";
 import { useAuth } from "../contexts/AuthContext";
+import { Inbox, CircleCheckBig, CircleX, Bell } from "lucide-react-native";
 
 type Notification = {
   id: string;
@@ -20,13 +21,15 @@ type Notification = {
   type: "request" | "accepted" | "rejected" | "available" | "general";
 };
 
-const TYPE_ICON: Record<string, string> = {
-  request: "📬",
-  accepted: "✅",
-  rejected: "❌",
-  available: "🥦",
-  general: "🔔",
-};
+function getTypeIcon(type: string) {
+  switch (type) {
+    case "request":  return <Inbox size={20} color="#3DDC97" />;
+    case "accepted": return <CircleCheckBig size={20} color="#3DDC97" />;
+    case "rejected": return <CircleX size={20} color="#FF4D4D" />;
+    case "available": return <Text style={{ fontSize: 20 }}>🥦</Text>;
+    default:         return <Bell size={20} color="#3DDC97" />;
+  }
+}
 
 const NAVIGABLE_TYPES = new Set(["request", "accepted", "rejected"]);
 
@@ -127,7 +130,7 @@ export default function NotificationsScreen({ navigation }: any) {
             activeOpacity={0.8}
           >
             <View style={s.iconWrapper}>
-              <Text style={s.icon}>{TYPE_ICON[item.type] ?? "🔔"}</Text>
+              {getTypeIcon(item.type)}
             </View>
             <View style={{ flex: 1 }}>
               <View style={s.row}>

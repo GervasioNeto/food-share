@@ -13,7 +13,9 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { supabase } from "../lib/supabase";
+import { CalendarDays, Pin } from "lucide-react-native";
 import { useAuth } from "../contexts/AuthContext";
+import { BackButton } from "../components/BackButton";
 
 type RequestStatus = "pending" | "accepted" | "rejected";
 
@@ -280,9 +282,7 @@ export default function NotificationDetailScreen({ route, navigation }: any) {
   return (
     <SafeAreaView style={s.safe}>
       <ScrollView contentContainerStyle={s.container}>
-        <TouchableOpacity style={s.backBtn} onPress={() => navigation.goBack()}>
-          <Text style={s.backText}>← Voltar</Text>
-        </TouchableOpacity>
+      <BackButton onPress={() => navigation.goBack()} />
 
         <View style={s.titleRow}>
           <Text style={s.pageTitle}>Solicitação</Text>
@@ -312,7 +312,10 @@ export default function NotificationDetailScreen({ route, navigation }: any) {
             <View style={{ flex: 1 }}>
               <Text style={s.requesterName}>{contactPerson?.name ?? "—"}</Text>
               {contactPerson?.address && (
-                <Text style={s.requesterMeta}>📍 {contactPerson.address}</Text>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 4, marginTop: 2 }}>
+                  <Pin size={12} color="#888" />
+                  <Text style={s.requesterMeta}>{contactPerson.address}</Text>
+                </View>
               )}
             </View>
           </View>
@@ -334,13 +337,15 @@ export default function NotificationDetailScreen({ route, navigation }: any) {
           <Text style={s.donationQty}>
             {request.donation.quantity} {request.donation.unit}
           </Text>
-          <View style={{ gap: 4, marginTop: 8 }}>
-            <Text style={s.donationMeta}>
-              📅 Validade: {formatDate(request.donation.expiry_date)}
-            </Text>
-            <Text style={s.donationMeta}>
-              📍 Retirada: {request.donation.pickup_address}
-            </Text>
+          <View style={{ gap: 6, marginTop: 8 }}>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+              <CalendarDays size={13} color="#888" />
+              <Text style={s.donationMeta}>Validade: {formatDate(request.donation.expiry_date)}</Text>
+            </View>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+              <Pin size={13} color="#888" />
+              <Text style={s.donationMeta}>Retirada: {request.donation.pickup_address}</Text>
+            </View>
           </View>
         </View>
 

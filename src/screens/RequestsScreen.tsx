@@ -15,6 +15,7 @@ import Toast from "react-native-toast-message";
 
 import { supabase } from "../lib/supabase";
 import { useAuth } from "../contexts/AuthContext";
+import { Inbox } from "lucide-react-native";
 
 type Request = {
   id: string;
@@ -351,13 +352,14 @@ export default function RequestsScreen({ navigation }: any) {
 
       {pending.length > 0 && (
         <View style={s.pendingBanner}>
-          <Text style={s.pendingBannerText}>
-            📬 {pending.length} solicitaç
-            {pending.length > 1
-              ? "ões"
-              : "ão"}{" "}
-            aguardando resposta
-          </Text>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+            <Inbox size={16} color="#3DDC97" />
+            <Text style={s.pendingBannerText}>
+              {pending.length} solicitaç
+              {pending.length > 1 ? "ões" : "ão"}{" "}
+              aguardando resposta
+            </Text>
+          </View>
         </View>
       )}
 
@@ -388,9 +390,7 @@ export default function RequestsScreen({ navigation }: any) {
           }
           ListEmptyComponent={
             <View style={s.empty}>
-              <Text style={s.emptyIcon}>
-                📬
-              </Text>
+              <Inbox size={48} color="#3DDC97" style={{ marginBottom: 12 }} />
 
               <Text style={s.emptyText}>
                 Nenhuma solicitação ainda
